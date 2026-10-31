@@ -1,0 +1,117 @@
+<UserControl x:Class="WindowsTuner.App.Views.TweaksView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Style="{StaticResource H1}" Text="Tweaks"/>
+            <TextBlock Style="{StaticResource PageSubtitle}"
+                       Text="Make Windows behave the way you want. Every switch is reversible: WindowsTuner remembers the original value the first time you change something, and turning it off puts that exact value back. Save your setup as a profile and apply it on any PC."/>
+            <WrapPanel>
+                <Button x:Name="RecommendedButton" Style="{StaticResource PrimaryButton}" Content="Apply recommended" Click="Recommended_Click"
+                        ToolTip="Turns on the tweaks marked ★ — safe changes that speed things up and remove ads/nags."/>
+                <Button Content="Save profile…" Click="SaveProfile_Click"/>
+                <Button Content="Load profile…" Click="LoadProfile_Click"/>
+                <Button Content="Custom tweaks…" Click="Custom_Click" ToolTip="Add your own registry tweaks in a JSON file."/>
+                <Button Content="Reload" Click="Reload_Click"/>
+                <Button x:Name="UndoAllButton" Style="{StaticResource DangerButton}" Content="Undo all my tweaks" Click="UndoAll_Click"/>
+            </WrapPanel>
+            <Border x:Name="RestartBanner" Style="{StaticResource Card}" Background="{DynamicResource AccentSoftBrush}" Visibility="Collapsed" Padding="12,8">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <Button x:Name="RestartExplorerButton" Content="Restart Explorer now" Click="RestartExplorer_Click" Margin="0,0,8,0"/>
+                        <Button x:Name="RebootButton" Content="Restart PC" Click="Reboot_Click" Margin="0"/>
+                    </StackPanel>
+                    <TextBlock x:Name="RestartText" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                </DockPanel>
+            </Border>
+        </StackPanel>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="190"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <DockPanel Margin="0,0,12,0">
+                <TextBox x:Name="Search" DockPanel.Dock="Top" Margin="0,0,0,8" TextChanged="Search_TextChanged" ToolTip="Search tweaks"/>
+                <CheckBox x:Name="ShowAdvanced" DockPanel.Dock="Bottom" Content="Show advanced tweaks" Click="Filter_Click" Margin="0,8,0,0"/>
+                <ListBox x:Name="Categories" Background="Transparent" BorderThickness="0" SelectionChanged="Categories_SelectionChanged">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Foreground" Value="{DynamicResource SubTextBrush}"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="Bd" Padding="10,7" CornerRadius="6" Background="Transparent">
+                                            <ContentPresenter/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource CardBrush}"/>
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource CardHoverBrush}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+            </DockPanel>
+
+            <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                <ItemsControl x:Name="TweakList">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource Card}" Padding="14,12" Margin="0,0,8,8">
+                                <DockPanel>
+                                    <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" VerticalAlignment="Center" Margin="12,0,0,0"
+                                              IsChecked="{Binding SwitchState, Mode=OneWay}" IsEnabled="{Binding IsApplicable}" Click="Toggle_Click"/>
+                                    <StackPanel>
+                                        <WrapPanel>
+                                            <TextBlock x:Name="Star" Text="★ " Foreground="{DynamicResource WarnBrush}" Visibility="Collapsed"/>
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" Margin="0,0,10,0"/>
+                                            <Border x:Name="RiskBadge" CornerRadius="4" Padding="6,1" Margin="0,0,6,0" Background="{DynamicResource CardHoverBrush}">
+                                                <TextBlock x:Name="RiskText" Text="{Binding Risk}" FontSize="11" Foreground="{DynamicResource GoodBrush}"/>
+                                            </Border>
+                                            <Border CornerRadius="4" Padding="6,1" Margin="0,0,6,0" Background="{DynamicResource CardHoverBrush}">
+                                                <TextBlock Text="{Binding Category}" FontSize="11" Foreground="{DynamicResource SubTextBrush}"/>
+                                            </Border>
+                                            <TextBlock Text="{Binding RestartText}" FontSize="11" Foreground="{DynamicResource SubTextBrush}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                            <TextBlock x:Name="CustomTag" Text="custom" FontSize="11" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" Visibility="Collapsed"/>
+                                        </WrapPanel>
+                                        <TextBlock Text="{Binding Description}" Style="{StaticResource Sub}" Margin="0,4,0,0"/>
+                                        <TextBlock x:Name="NA" Text="{Binding StateText}" FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" Visibility="Collapsed"/>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding Risk}" Value="Moderate">
+                                    <Setter TargetName="RiskText" Property="Foreground" Value="{DynamicResource WarnBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Risk}" Value="Advanced">
+                                    <Setter TargetName="RiskText" Property="Foreground" Value="{DynamicResource BadBrush}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsRecommended}" Value="True">
+                                    <Setter TargetName="Star" Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsCustom}" Value="True">
+                                    <Setter TargetName="CustomTag" Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsApplicable}" Value="False">
+                                    <Setter TargetName="NA" Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding State}" Value="Partial">
+                                    <Setter TargetName="NA" Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </DockPanel>
+</UserControl>

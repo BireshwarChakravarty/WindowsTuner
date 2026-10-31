@@ -1,0 +1,395 @@
+{
+  // WindowsTuner built-in tweak catalog.
+  // Each tweak lists registry values for its "on" state. "off": null (or omitted) deletes the value,
+  // which restores the Windows default. When WindowsTuner turns a tweak on it first saves the original
+  // values to an undo journal, and turning it off restores those exact values.
+  // You can add your own tweaks in %LOCALAPPDATA%\WindowsTuner\custom-tweaks.json using this same format.
+  "version": 1,
+  "tweaks": [
+    // ───────────────────────── Explorer ─────────────────────────
+    {
+      "id": "explorer.showExtensions", "category": "Explorer", "name": "Show file extensions",
+      "description": "Shows .exe, .pdf, .docx and so on. Makes it much harder for malware to disguise itself (e.g. invoice.pdf.exe).",
+      "risk": "Safe", "restart": "Explorer", "recommended": true,
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "name": "HideFileExt", "kind": "DWord", "on": 0, "off": 1 } ]
+    },
+    {
+      "id": "explorer.showHidden", "category": "Explorer", "name": "Show hidden files and folders",
+      "description": "Shows files marked hidden, such as AppData. Protected operating system files stay hidden.",
+      "risk": "Safe", "restart": "Explorer",
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "name": "Hidden", "kind": "DWord", "on": 1, "off": 2 } ]
+    },
+    {
+      "id": "explorer.openThisPC", "category": "Explorer", "name": "Open File Explorer to This PC",
+      "description": "File Explorer opens on This PC (your drives) instead of Home / Quick access.",
+      "risk": "Safe", "restart": "None",
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "name": "LaunchTo", "kind": "DWord", "on": 1, "off": null } ]
+    },
+    {
+      "id": "explorer.classicContextMenu", "category": "Explorer", "name": "Classic right-click menu (Windows 11)",
+      "description": "Brings back the full Windows 10 style context menu, no more \"Show more options\".",
+      "risk": "Safe", "restart": "Explorer", "minBuild": 22000,
+      "registry": [ { "hive": "HKCU", "path": "Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32", "name": "", "kind": "String", "on": "", "off": null, "deleteKeyWhenOff": true } ]
+    },
+    {
+      "id": "explorer.fullPathTitle", "category": "Explorer", "name": "Show full path in the title bar",
+      "description": "Displays the complete folder path in File Explorer's title/tab.",
+      "risk": "Safe", "restart": "Explorer",
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CabinetState", "name": "FullPath", "kind": "DWord", "on": 1, "off": 0 } ]
+    },
+    {
+      "id": "explorer.noRecentFiles", "category": "Explorer", "name": "Don't show recent and frequent files",
+      "description": "Stops Explorer's Home/Quick access from listing recently opened files and frequent folders.",
+      "risk": "Safe", "restart": "Explorer",
+      "registry": [
+        { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer", "name": "ShowRecent", "kind": "DWord", "on": 0, "off": 1 },
+        { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer", "name": "ShowFrequent", "kind": "DWord", "on": 0, "off": 1 }
+      ]
+    },
+    {
+      "id": "explorer.compactView", "category": "Explorer", "name": "Compact view (Windows 11)",
+      "description": "Reduces the spacing between items in File Explorer so more fits on screen.",
+      "risk": "Safe", "restart": "Explorer", "minBuild": 22000,
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "name": "UseCompactMode", "kind": "DWord", "on": 1, "off": 0 } ]
+    },
+
+    // ───────────────────────── Taskbar & Start ─────────────────────────
+    {
+      "id": "taskbar.alignLeft", "category": "Taskbar & Start", "name": "Taskbar icons on the left (Windows 11)",
+      "description": "Moves the Start button and taskbar icons to the left like Windows 10.",
+      "risk": "Safe", "restart": "None", "minBuild": 22000,
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "name": "TaskbarAl", "kind": "DWord", "on": 0, "off": 1 } ]
+    },
+    {
+      "id": "taskbar.hideSearch", "category": "Taskbar & Start", "name": "Hide the Search box on the taskbar",
+      "description": "Frees taskbar space. You can still search by pressing the Windows key and typing.",
+      "risk": "Safe", "restart": "None",
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Search", "name": "SearchboxTaskbarMode", "kind": "DWord", "on": 0, "off": 1 } ]
+    },
+    {
+      "id": "taskbar.hideTaskView", "category": "Taskbar & Start", "name": "Hide the Task View button",
+      "description": "Removes the Task View button. Win+Tab still works.",
+      "risk": "Safe", "restart": "None",
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "name": "ShowTaskViewButton", "kind": "DWord", "on": 0, "off": 1 } ]
+    },
+    {
+      "id": "taskbar.disableWidgets", "category": "Taskbar & Start", "name": "Turn off Widgets / News and interests",
+      "description": "Removes the weather/news widgets board and its background process (saves RAM and network).",
+      "risk": "Safe", "restart": "Explorer", "recommended": true,
+      "registry": [ { "hive": "HKLM", "path": "SOFTWARE\\Policies\\Microsoft\\Dsh", "name": "AllowNewsAndInterests", "kind": "DWord", "on": 0, "off": null } ]
+    },
+    {
+      "id": "taskbar.secondsInClock", "category": "Taskbar & Start", "name": "Show seconds in the taskbar clock",
+      "description": "Adds seconds to the clock (uses a tiny bit more power on laptops).",
+      "risk": "Safe", "restart": "Explorer",
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "name": "ShowSecondsInSystemClock", "kind": "DWord", "on": 1, "off": 0 } ]
+    },
+    {
+      "id": "taskbar.endTask", "category": "Taskbar & Start", "name": "Add \"End task\" to taskbar right-click (Windows 11)",
+      "description": "Right-click a frozen app on the taskbar to kill it, no Task Manager needed.",
+      "risk": "Safe", "restart": "None", "minBuild": 22631,
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\\TaskbarDeveloperSettings", "name": "TaskbarEndTask", "kind": "DWord", "on": 1, "off": 0 } ]
+    },
+    {
+      "id": "start.noWebSearch", "category": "Taskbar & Start", "name": "No Bing web results in Start search",
+      "description": "Start menu search only searches your PC. Faster and more private.",
+      "risk": "Safe", "restart": "Explorer", "recommended": true,
+      "registry": [
+        { "hive": "HKCU", "path": "Software\\Policies\\Microsoft\\Windows\\Explorer", "name": "DisableSearchBoxSuggestions", "kind": "DWord", "on": 1, "off": null },
+        { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Search", "name": "BingSearchEnabled", "kind": "DWord", "on": 0, "off": null }
+      ]
+    },
+    {
+      "id": "start.noRecommendations", "category": "Taskbar & Start", "name": "No app suggestions and tips in Start",
+      "description": "Stops Start from promoting apps and showing tips/shortcuts recommendations.",
+      "risk": "Safe", "restart": "None", "recommended": true,
+      "registry": [
+        { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "name": "SubscribedContent-338388Enabled", "kind": "DWord", "on": 0, "off": 1 },
+        { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "name": "SystemPaneSuggestionsEnabled", "kind": "DWord", "on": 0, "off": 1 },
+        { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "name": "Start_IrisRecommendations", "kind": "DWord", "on": 0, "off": 1 }
+      ]
+    },
+    {
+      "id": "start.noTrackLaunches", "category": "Taskbar & Start", "name": "Don't track app launches",
+      "description": "Windows stops recording which apps you open to personalize Start and search.",
+      "risk": "Safe", "restart": "None",
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "name": "Start_TrackProgs", "kind": "DWord", "on": 0, "off": 1 } ]
+    },
+    {
+      "id": "taskbar.hideCopilot", "category": "Taskbar & Start", "name": "Hide the Copilot button",
+      "description": "Removes the Copilot button from the taskbar (the Copilot app itself can be removed on the Apps page).",
+      "risk": "Safe", "restart": "Explorer", "minBuild": 22000,
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "name": "ShowCopilotButton", "kind": "DWord", "on": 0, "off": 1 } ]
+    },
+
+    // ───────────────────────── Privacy & Ads ─────────────────────────
+    {
+      "id": "privacy.adId", "category": "Privacy & Ads", "name": "Turn off the advertising ID",
+      "description": "Apps can no longer use your advertising ID to show personalised ads.",
+      "risk": "Safe", "restart": "None", "recommended": true,
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\AdvertisingInfo", "name": "Enabled", "kind": "DWord", "on": 0, "off": 1 } ]
+    },
+    {
+      "id": "privacy.noTips", "category": "Privacy & Ads", "name": "No \"tips and suggestions\" notifications",
+      "description": "Stops the pop-up tips, tricks and \"get even more out of Windows\" nags.",
+      "risk": "Safe", "restart": "None", "recommended": true,
+      "registry": [
+        { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "name": "SubscribedContent-338389Enabled", "kind": "DWord", "on": 0, "off": 1 },
+        { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "name": "SoftLandingEnabled", "kind": "DWord", "on": 0, "off": 1 },
+        { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\UserProfileEngagement", "name": "ScoobeSystemSettingEnabled", "kind": "DWord", "on": 0, "off": 1 }
+      ]
+    },
+    {
+      "id": "privacy.noLockScreenAds", "category": "Privacy & Ads", "name": "No fun facts and ads on the lock screen",
+      "description": "Removes the tips, facts and promotions overlaid on the lock screen picture.",
+      "risk": "Safe", "restart": "None",
+      "registry": [
+        { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "name": "RotatingLockScreenOverlayEnabled", "kind": "DWord", "on": 0, "off": 1 },
+        { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "name": "SubscribedContent-338387Enabled", "kind": "DWord", "on": 0, "off": 1 }
+      ]
+    },
+    {
+      "id": "privacy.noSilentApps", "category": "Privacy & Ads", "name": "Stop Windows installing suggested apps",
+      "description": "Prevents Windows from silently installing promoted apps (games, social apps) for your account.",
+      "risk": "Safe", "restart": "None", "recommended": true,
+      "registry": [
+        { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "name": "SilentInstalledAppsEnabled", "kind": "DWord", "on": 0, "off": 1 },
+        { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "name": "PreInstalledAppsEnabled", "kind": "DWord", "on": 0, "off": 1 },
+        { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "name": "OemPreInstalledAppsEnabled", "kind": "DWord", "on": 0, "off": 1 }
+      ]
+    },
+    {
+      "id": "privacy.noSettingsSuggestions", "category": "Privacy & Ads", "name": "No suggested content in Settings",
+      "description": "Hides the suggestions/promotions shown inside the Settings app.",
+      "risk": "Safe", "restart": "None",
+      "registry": [
+        { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "name": "SubscribedContent-338393Enabled", "kind": "DWord", "on": 0, "off": 1 },
+        { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "name": "SubscribedContent-353694Enabled", "kind": "DWord", "on": 0, "off": 1 },
+        { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "name": "SubscribedContent-353696Enabled", "kind": "DWord", "on": 0, "off": 1 }
+      ]
+    },
+    {
+      "id": "privacy.noTailored", "category": "Privacy & Ads", "name": "No tailored experiences",
+      "description": "Microsoft won't use your diagnostic data to personalise tips and ads.",
+      "risk": "Safe", "restart": "None",
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Privacy", "name": "TailoredExperiencesWithDiagnosticDataEnabled", "kind": "DWord", "on": 0, "off": 1 } ]
+    },
+    {
+      "id": "privacy.noActivityHistory", "category": "Privacy & Ads", "name": "Turn off activity history",
+      "description": "Windows stops collecting and uploading a history of the apps, files and sites you use.",
+      "risk": "Safe", "restart": "None",
+      "registry": [
+        { "hive": "HKLM", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System", "name": "PublishUserActivities", "kind": "DWord", "on": 0, "off": null },
+        { "hive": "HKLM", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System", "name": "UploadUserActivities", "kind": "DWord", "on": 0, "off": null }
+      ]
+    },
+    {
+      "id": "privacy.minTelemetry", "category": "Privacy & Ads", "name": "Diagnostic data: required only",
+      "description": "Limits telemetry to the minimum Microsoft needs to keep Windows updated (the \"Required\" level).",
+      "risk": "Moderate", "restart": "Reboot",
+      "registry": [ { "hive": "HKLM", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection", "name": "AllowTelemetry", "kind": "DWord", "on": 1, "off": null } ]
+    },
+
+    // ───────────────────────── Performance ─────────────────────────
+    {
+      "id": "perf.disableFastStartup", "category": "Performance", "name": "Turn off Fast Startup",
+      "description": "Makes Shut down a real shutdown. Fast Startup hibernates the kernel, so drivers and memory leaks survive \"shutdowns\" for weeks and updates may not finish. Boot takes a few seconds longer.",
+      "risk": "Safe", "restart": "None", "recommended": true,
+      "registry": [ { "hive": "HKLM", "path": "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Power", "name": "HiberbootEnabled", "kind": "DWord", "on": 0, "off": 1 } ]
+    },
+    {
+      "id": "perf.visualEffects", "category": "Performance", "name": "Adjust visual effects for best performance",
+      "description": "Turns off animations, shadows and fades (\"Adjust for best performance\"). Biggest benefit on older PCs and integrated graphics.",
+      "risk": "Safe", "restart": "SignOut",
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects", "name": "VisualFXSetting", "kind": "DWord", "on": 2, "off": 0 } ]
+    },
+    {
+      "id": "perf.noTransparency", "category": "Performance", "name": "Turn off transparency effects",
+      "description": "Disables the blurred see-through effect on Start, taskbar and windows. Saves GPU work on low-end PCs.",
+      "risk": "Safe", "restart": "None",
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "name": "EnableTransparency", "kind": "DWord", "on": 0, "off": 1 } ]
+    },
+    {
+      "id": "perf.fastMenus", "category": "Performance", "name": "Faster menus",
+      "description": "Menus open after 100 ms instead of 400 ms.",
+      "risk": "Safe", "restart": "SignOut", "recommended": true,
+      "registry": [ { "hive": "HKCU", "path": "Control Panel\\Desktop", "name": "MenuShowDelay", "kind": "String", "on": "100", "off": "400" } ]
+    },
+    {
+      "id": "perf.noMinimizeAnimation", "category": "Performance", "name": "No minimize/maximize animation",
+      "description": "Windows snap open and closed instantly.",
+      "risk": "Safe", "restart": "SignOut",
+      "registry": [ { "hive": "HKCU", "path": "Control Panel\\Desktop\\WindowMetrics", "name": "MinAnimate", "kind": "String", "on": "0", "off": "1" } ]
+    },
+    {
+      "id": "perf.noStartupDelay", "category": "Performance", "name": "Remove the startup-apps delay",
+      "description": "Windows normally waits ~10 seconds after sign-in before launching startup apps. This removes that delay (only do this with few startup apps).",
+      "risk": "Moderate", "restart": "None",
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Serialize", "name": "StartupDelayInMSec", "kind": "DWord", "on": 0, "off": null } ]
+    },
+    {
+      "id": "perf.noBackgroundApps", "category": "Performance", "name": "Stop Store apps running in the background",
+      "description": "Store apps (Weather, Phone Link, etc.) can't run when closed. Saves RAM and battery, but those apps won't show live notifications.",
+      "risk": "Moderate", "restart": "SignOut",
+      "registry": [ { "hive": "HKLM", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AppPrivacy", "name": "LetAppsRunInBackground", "kind": "DWord", "on": 2, "off": null } ]
+    },
+    {
+      "id": "perf.storageSense", "category": "Performance", "name": "Turn on Storage Sense",
+      "description": "Windows automatically clears temp files and old Recycle Bin items when disk space runs low.",
+      "risk": "Safe", "restart": "None", "recommended": true,
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\StorageSense\\Parameters\\StoragePolicy", "name": "01", "kind": "DWord", "on": 1, "off": 0 } ]
+    },
+    {
+      "id": "perf.hibernateOff", "category": "Performance", "name": "Turn off hibernation (frees disk space)",
+      "description": "Deletes hiberfil.sys, freeing disk space roughly 40% the size of your RAM. Also disables Fast Startup. Not recommended for laptops that rely on hibernate.",
+      "risk": "Moderate", "restart": "None",
+      "registry": [ { "hive": "HKLM", "path": "SYSTEM\\CurrentControlSet\\Control\\Power", "name": "HibernateEnabled", "kind": "DWord", "on": 0, "off": 1, "detectOnly": true } ],
+      "onCommands": [ "powercfg.exe /hibernate off" ],
+      "offCommands": [ "powercfg.exe /hibernate on" ]
+    },
+    {
+      "id": "perf.longPaths", "category": "Performance", "name": "Allow long file paths",
+      "description": "Lets modern apps use paths longer than 260 characters (fixes some copy/extract errors).",
+      "risk": "Safe", "restart": "Reboot",
+      "registry": [ { "hive": "HKLM", "path": "SYSTEM\\CurrentControlSet\\Control\\FileSystem", "name": "LongPathsEnabled", "kind": "DWord", "on": 1, "off": 0 } ]
+    },
+
+    // ───────────────────────── Gaming ─────────────────────────
+    {
+      "id": "gaming.noGameDvr", "category": "Gaming", "name": "Turn off background game recording",
+      "description": "Disables Xbox Game Bar's always-on capture (Game DVR), which costs FPS. Win+Alt+R recording is also disabled.",
+      "risk": "Safe", "restart": "None",
+      "registry": [
+        { "hive": "HKCU", "path": "System\\GameConfigStore", "name": "GameDVR_Enabled", "kind": "DWord", "on": 0, "off": 1 },
+        { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\GameDVR", "name": "AppCaptureEnabled", "kind": "DWord", "on": 0, "off": 1 }
+      ]
+    },
+    {
+      "id": "gaming.gameMode", "category": "Gaming", "name": "Game Mode on",
+      "description": "Windows prioritises the game you're playing and pauses Windows Update installs during play.",
+      "risk": "Safe", "restart": "None",
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\GameBar", "name": "AutoGameModeEnabled", "kind": "DWord", "on": 1, "off": 0 } ]
+    },
+    {
+      "id": "gaming.hags", "category": "Gaming", "name": "Hardware-accelerated GPU scheduling",
+      "description": "Lets the GPU manage its own memory scheduling. Can reduce latency on modern GPUs (NVIDIA 10-series+, AMD RX 5000+). Turn off if you see stutter.",
+      "risk": "Moderate", "restart": "Reboot",
+      "registry": [ { "hive": "HKLM", "path": "SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers", "name": "HwSchMode", "kind": "DWord", "on": 2, "off": 1 } ]
+    },
+    {
+      "id": "input.noMouseAccel", "category": "Gaming", "name": "Turn off mouse acceleration",
+      "description": "Disables \"Enhance pointer precision\" so the pointer moves exactly as far as the mouse. Preferred for gaming.",
+      "risk": "Safe", "restart": "SignOut",
+      "registry": [
+        { "hive": "HKCU", "path": "Control Panel\\Mouse", "name": "MouseSpeed", "kind": "String", "on": "0", "off": "1" },
+        { "hive": "HKCU", "path": "Control Panel\\Mouse", "name": "MouseThreshold1", "kind": "String", "on": "0", "off": "6" },
+        { "hive": "HKCU", "path": "Control Panel\\Mouse", "name": "MouseThreshold2", "kind": "String", "on": "0", "off": "10" }
+      ]
+    },
+
+    // ───────────────────────── Appearance ─────────────────────────
+    {
+      "id": "look.darkApps", "category": "Appearance", "name": "Dark mode for apps",
+      "description": "Settings, Explorer and apps that follow the system theme go dark.",
+      "risk": "Safe", "restart": "None",
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "name": "AppsUseLightTheme", "kind": "DWord", "on": 0, "off": 1 } ]
+    },
+    {
+      "id": "look.darkSystem", "category": "Appearance", "name": "Dark mode for Windows (taskbar, Start)",
+      "description": "The taskbar, Start menu and Action Center go dark.",
+      "risk": "Safe", "restart": "None",
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "name": "SystemUsesLightTheme", "kind": "DWord", "on": 0, "off": 1 } ]
+    },
+    {
+      "id": "look.accentTitleBars", "category": "Appearance", "name": "Accent colour on title bars",
+      "description": "Window title bars and borders use your accent colour.",
+      "risk": "Safe", "restart": "None",
+      "registry": [ { "hive": "HKCU", "path": "Software\\Microsoft\\Windows\\DWM", "name": "ColorPrevalence", "kind": "DWord", "on": 1, "off": 0 } ]
+    },
+    {
+      "id": "look.noLogonBlur", "category": "Appearance", "name": "No blur on the sign-in screen",
+      "description": "Shows the lock-screen picture sharp behind the password box.",
+      "risk": "Safe", "restart": "None",
+      "registry": [ { "hive": "HKLM", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System", "name": "DisableAcrylicBackgroundOnLogon", "kind": "DWord", "on": 1, "off": null } ]
+    },
+    {
+      "id": "look.verboseStatus", "category": "Appearance", "name": "Detailed startup/shutdown messages",
+      "description": "Shows what Windows is doing (\"Applying settings…\", \"Stopping services…\") during sign-in and shutdown — handy for diagnosing slow boots.",
+      "risk": "Safe", "restart": "None",
+      "registry": [ { "hive": "HKLM", "path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System", "name": "VerboseStatus", "kind": "DWord", "on": 1, "off": null } ]
+    },
+
+    // ───────────────────────── Windows Update ─────────────────────────
+    {
+      "id": "wu.noP2PUpload", "category": "Windows Update", "name": "Don't upload updates to other PCs on the internet",
+      "description": "Delivery Optimization will only download from Microsoft, never upload your bandwidth to strangers.",
+      "risk": "Safe", "restart": "None", "recommended": true,
+      "registry": [ { "hive": "HKLM", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization", "name": "DODownloadMode", "kind": "DWord", "on": 0, "off": null } ]
+    },
+    {
+      "id": "wu.noDrivers", "category": "Windows Update", "name": "Don't get drivers from Windows Update",
+      "description": "Stops Windows Update replacing drivers you installed from NVIDIA/AMD/your PC maker. Only enable this if you manage drivers yourself.",
+      "risk": "Advanced", "restart": "None",
+      "registry": [ { "hive": "HKLM", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "name": "ExcludeWUDriversInQualityUpdate", "kind": "DWord", "on": 1, "off": null } ]
+    },
+    {
+      "id": "wu.noAutoRestart", "category": "Windows Update", "name": "No automatic restart while you're signed in",
+      "description": "Windows Update waits for you to restart instead of rebooting on its own while you're signed in.",
+      "risk": "Safe", "restart": "None",
+      "registry": [ { "hive": "HKLM", "path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU", "name": "NoAutoRebootWithLoggedOnUsers", "kind": "DWord", "on": 1, "off": null } ]
+    },
+
+    // ───────────────────────── Services ─────────────────────────
+    {
+      "id": "svc.noTelemetryService", "category": "Services", "name": "Disable the telemetry service (DiagTrack)",
+      "description": "Stops \"Connected User Experiences and Telemetry\". Reduces background disk/network use. Feedback Hub stops working.",
+      "risk": "Moderate", "restart": "None",
+      "registry": [ { "hive": "HKLM", "path": "SYSTEM\\CurrentControlSet\\Services\\DiagTrack", "name": "Start", "kind": "DWord", "on": 4, "off": 2 } ],
+      "onCommands": [ "sc.exe stop DiagTrack" ],
+      "offCommands": [ "sc.exe start DiagTrack" ]
+    },
+    {
+      "id": "svc.noSysMain", "category": "Services", "name": "Disable SysMain (Superfetch)",
+      "description": "SysMain preloads apps into RAM. On PCs with a hard disk (HDD) it can cause 100% disk usage; on SSDs it's harmless. Only disable if your disk is constantly at 100%.",
+      "risk": "Advanced", "restart": "None",
+      "registry": [ { "hive": "HKLM", "path": "SYSTEM\\CurrentControlSet\\Services\\SysMain", "name": "Start", "kind": "DWord", "on": 4, "off": 2 } ],
+      "onCommands": [ "sc.exe stop SysMain" ],
+      "offCommands": [ "sc.exe start SysMain" ]
+    },
+    {
+      "id": "svc.noSearchIndexer", "category": "Services", "name": "Disable Windows Search indexing",
+      "description": "Stops the indexer that scans your files. Saves disk/CPU on slow PCs, but searching Start, Explorer and Outlook becomes much slower.",
+      "risk": "Advanced", "restart": "None",
+      "registry": [ { "hive": "HKLM", "path": "SYSTEM\\CurrentControlSet\\Services\\WSearch", "name": "Start", "kind": "DWord", "on": 4, "off": 2 } ],
+      "onCommands": [ "sc.exe stop WSearch" ],
+      "offCommands": [ "sc.exe start WSearch" ]
+    },
+    {
+      "id": "svc.noXboxServices", "category": "Services", "name": "Set Xbox services to manual (non-gamers)",
+      "description": "Xbox Live auth, save sync and networking services only start when an Xbox app needs them.",
+      "risk": "Moderate", "restart": "None",
+      "registry": [
+        { "hive": "HKLM", "path": "SYSTEM\\CurrentControlSet\\Services\\XblAuthManager", "name": "Start", "kind": "DWord", "on": 3, "off": null },
+        { "hive": "HKLM", "path": "SYSTEM\\CurrentControlSet\\Services\\XblGameSave", "name": "Start", "kind": "DWord", "on": 3, "off": null },
+        { "hive": "HKLM", "path": "SYSTEM\\CurrentControlSet\\Services\\XboxNetApiSvc", "name": "Start", "kind": "DWord", "on": 3, "off": null }
+      ]
+    },
+
+    // ───────────────────────── Input & Accessibility ─────────────────────────
+    {
+      "id": "input.noStickyKeysPrompt", "category": "Input & Accessibility", "name": "No Sticky Keys pop-up (Shift ×5)",
+      "description": "Pressing Shift five times no longer opens the Sticky Keys prompt (great for games).",
+      "risk": "Safe", "restart": "SignOut",
+      "registry": [ { "hive": "HKCU", "path": "Control Panel\\Accessibility\\StickyKeys", "name": "Flags", "kind": "String", "on": "506", "off": "510" } ]
+    },
+    {
+      "id": "input.numLockOnBoot", "category": "Input & Accessibility", "name": "Num Lock on at sign-in",
+      "description": "Turns Num Lock on automatically on the sign-in screen and after you sign in.",
+      "risk": "Safe", "restart": "SignOut",
+      "registry": [
+        { "hive": "HKU", "path": ".DEFAULT\\Control Panel\\Keyboard", "name": "InitialKeyboardIndicators", "kind": "String", "on": "2", "off": "0" },
+        { "hive": "HKCU", "path": "Control Panel\\Keyboard", "name": "InitialKeyboardIndicators", "kind": "String", "on": "2", "off": "0" }
+      ]
+    }
+  ]
+}

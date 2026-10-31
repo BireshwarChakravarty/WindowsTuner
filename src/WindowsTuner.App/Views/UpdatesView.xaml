@@ -1,0 +1,89 @@
+<UserControl x:Class="WindowsTuner.App.Views.UpdatesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Style="{StaticResource H1}" Text="Updates"/>
+            <TextBlock Style="{StaticResource PageSubtitle}"
+                       Text="Apps update through winget (Microsoft's package manager), Windows and drivers through Windows Update — the same official sources the Settings app and the Store use."/>
+        </StackPanel>
+        <TabControl>
+            <!-- Apps -->
+            <TabItem Header="Apps">
+                <DockPanel>
+                    <WrapPanel DockPanel.Dock="Top">
+                        <Button x:Name="ScanAppsButton" Style="{StaticResource PrimaryButton}" Content="Check for app updates" Click="ScanApps_Click"/>
+                        <Button x:Name="UpdateSelectedButton" Content="Update selected" Click="UpdateSelected_Click"/>
+                        <Button x:Name="UpdateAllButton" Content="Update all" Click="UpdateAll_Click"/>
+                        <Button x:Name="SkipButton" Content="Never update selected" Click="Skip_Click"
+                                ToolTip="Adds the selected apps to your skip list (Settings). Tune-up will leave them alone."/>
+                        <Button x:Name="StoreButton" Content="Update Microsoft Store apps" Click="Store_Click"/>
+                        <CheckBox x:Name="IncludeUnknown" Content="Include apps whose version winget can't detect" VerticalAlignment="Center" Margin="8,0,0,8"/>
+                    </WrapPanel>
+                    <Border x:Name="WingetMissing" DockPanel.Dock="Top" Style="{StaticResource Card}" Visibility="Collapsed">
+                        <StackPanel>
+                            <TextBlock Text="winget isn't installed or is out of date" FontWeight="SemiBold" FontSize="14"/>
+                            <TextBlock Style="{StaticResource Sub}" Margin="0,4,0,8"
+                                       Text="winget comes with the free &quot;App Installer&quot; from the Microsoft Store. Install or update it, then click Check again."/>
+                            <Button HorizontalAlignment="Left" Content="Open App Installer in the Store" Click="GetWinget_Click"/>
+                        </StackPanel>
+                    </Border>
+                    <TextBlock x:Name="AppsSummary" DockPanel.Dock="Top" Style="{StaticResource Sub}" Margin="0,0,0,8"
+                               Text="Click &quot;Check for app updates&quot; to see which apps are out of date."/>
+                    <DataGrid x:Name="AppsGrid">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Width="40" Header="">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" Margin="0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="App" Binding="{Binding Name}" Width="2*" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Installed" Binding="{Binding InstalledVersion}" Width="*" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Available" Binding="{Binding AvailableVersion}" Width="*" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="70" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Status" Binding="{Binding Message}" Width="2*" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Package ID" Binding="{Binding Id}" Width="1.5*" IsReadOnly="True"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </TabItem>
+
+            <!-- Windows -->
+            <TabItem Header="Windows &amp; drivers">
+                <DockPanel>
+                    <WrapPanel DockPanel.Dock="Top">
+                        <Button x:Name="ScanWuButton" Style="{StaticResource PrimaryButton}" Content="Check Windows Update" Click="ScanWu_Click"/>
+                        <Button x:Name="InstallWuButton" Content="Install selected" Click="InstallWu_Click"/>
+                        <Button Content="Windows Update settings" Click="WuSettings_Click"/>
+                        <Button Content="Optional updates" Click="WuOptional_Click"/>
+                    </WrapPanel>
+                    <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                        <CheckBox x:Name="IncludeDrivers" Content="Include driver updates"/>
+                        <CheckBox x:Name="IncludeOptional" Content="Include optional (preview) updates"/>
+                        <CheckBox x:Name="MicrosoftUpdate" Content="Also update Office and other Microsoft products" Click="MicrosoftUpdate_Click"/>
+                    </WrapPanel>
+                    <TextBlock x:Name="WuSummary" DockPanel.Dock="Top" Style="{StaticResource Sub}" Margin="0,0,0,8"
+                               Text="Windows Update can take several minutes to search on a PC that has been off for a while — that's normal."/>
+                    <DataGrid x:Name="WuGrid">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Width="40" Header="">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" Margin="0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Type" Binding="{Binding Kind}" Width="80" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Update" Binding="{Binding Title}" Width="3*" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="KB" Binding="{Binding KB}" Width="90" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Size" Binding="{Binding Size}" Width="80" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Status" Binding="{Binding Message}" Width="1.5*" IsReadOnly="True"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</UserControl>

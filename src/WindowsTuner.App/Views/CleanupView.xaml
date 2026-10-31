@@ -1,0 +1,54 @@
+<UserControl x:Class="WindowsTuner.App.Views.CleanupView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Style="{StaticResource H1}" Text="Clean up"/>
+            <TextBlock Style="{StaticResource PageSubtitle}"
+                       Text="Frees disk space by deleting files Windows and apps no longer need. Nothing personal (documents, photos, passwords, browser history) is touched. Files in use are skipped automatically."/>
+            <WrapPanel>
+                <Button x:Name="AnalyzeButton" Content="Analyze" Click="Analyze_Click"/>
+                <Button x:Name="CleanButton" Style="{StaticResource PrimaryButton}" Content="Clean selected" Click="Clean_Click"/>
+                <TextBlock x:Name="TotalText" VerticalAlignment="Center" Margin="8,0,0,8" FontWeight="SemiBold"/>
+            </WrapPanel>
+        </StackPanel>
+
+        <Border DockPanel.Dock="Bottom" Style="{StaticResource Card}" Margin="0,12,0,0">
+            <StackPanel>
+                <TextBlock Text="Deep clean" FontWeight="SemiBold" FontSize="14"/>
+                <TextBlock Style="{StaticResource Sub}" Margin="0,4,0,10"
+                           Text="Windows keeps old versions of every component it updates (the WinSxS folder). After a big catch-up on updates this can be several GB. Cleaning it is safe but slow, and the installed updates can no longer be uninstalled. Windows.old (left after a Windows upgrade) is removed from Disk Cleanup → Clean up system files."/>
+                <WrapPanel>
+                    <Button x:Name="AnalyzeComponentsButton" Content="Analyze Windows components" Click="AnalyzeComponents_Click"/>
+                    <Button x:Name="CleanComponentsButton" Content="Clean up Windows components" Click="CleanComponents_Click"/>
+                    <Button Content="Disk Cleanup (incl. Windows.old)" Click="DiskCleanup_Click"/>
+                    <Button Content="Storage Sense settings" Click="StorageSense_Click"/>
+                </WrapPanel>
+            </StackPanel>
+        </Border>
+
+        <DataGrid x:Name="Grid">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Width="40" Header="">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" Margin="0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="What" Binding="{Binding Name}" Width="1.6*" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Group" Binding="{Binding Group}" Width="110" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Size" Binding="{Binding SizeText}" Width="90" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Details" Binding="{Binding Description}" Width="3*" IsReadOnly="True">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                            <Setter Property="ToolTip" Value="{Binding Description}"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Result" Binding="{Binding Status}" Width="1.4*" IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</UserControl>

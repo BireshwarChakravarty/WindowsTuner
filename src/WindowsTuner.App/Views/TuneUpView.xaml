@@ -1,0 +1,56 @@
+<UserControl x:Class="WindowsTuner.App.Views.TuneUpView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Style="{StaticResource H1}" Text="One-click Tune-up"/>
+            <TextBlock Style="{StaticResource PageSubtitle}"
+                       Text="Does the whole routine in the right order: safety restore point → virus definitions → junk cleanup → app updates → Store updates → Windows updates → driver updates → drive optimization. Pick the steps you want; your choice is remembered."/>
+            <WrapPanel>
+                <Button x:Name="StartButton" Style="{StaticResource PrimaryButton}" Content="⚡ Start Tune-up" Click="Start_Click" Padding="20,9" FontSize="14"/>
+                <Button x:Name="RestartButton" Content="Restart to finish" Click="Restart_Click" Visibility="Collapsed"/>
+                <TextBlock x:Name="ResultText" VerticalAlignment="Center" Margin="8,0,0,8" FontWeight="SemiBold" TextWrapping="Wrap"/>
+            </WrapPanel>
+        </StackPanel>
+
+        <Border DockPanel.Dock="Bottom" Style="{StaticResource Card}" Margin="0,12,0,0">
+            <StackPanel>
+                <TextBlock Text="Keep it tuned automatically" FontWeight="SemiBold" FontSize="14"/>
+                <TextBlock Style="{StaticResource Sub}" Margin="0,4,0,10"
+                           Text="Runs the selected steps every week in the background with administrator rights (Task Scheduler). If the PC is off at that time, it runs as soon as possible afterwards. Laptops only run it while plugged in. Results go to the log file."/>
+                <WrapPanel>
+                    <CheckBox x:Name="ScheduleEnabled" Style="{StaticResource Switch}" Content="Weekly tune-up" Click="Schedule_Click" Margin="0,0,16,8" VerticalAlignment="Center"/>
+                    <TextBlock Text="on" VerticalAlignment="Center" Margin="0,0,8,8"/>
+                    <ComboBox x:Name="DayBox" Width="130" SelectionChanged="ScheduleChanged"/>
+                    <TextBlock Text="at" VerticalAlignment="Center" Margin="0,0,8,8"/>
+                    <ComboBox x:Name="HourBox" Width="90" SelectionChanged="ScheduleChanged"/>
+                </WrapPanel>
+            </StackPanel>
+        </Border>
+
+        <DataGrid x:Name="StepsGrid" RowHeight="46">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Width="40" Header="">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" Margin="0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Step" Width="3*" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding Description}" FontSize="11" Foreground="{DynamicResource SubTextBrush}" TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Takes" Binding="{Binding Duration}" Width="90" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Status" Binding="{Binding OutcomeText}" Width="150" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Result" Binding="{Binding Detail}" Width="2*" IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</UserControl>

@@ -1,0 +1,53 @@
+<UserControl x:Class="WindowsTuner.App.Views.StartupView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Style="{StaticResource H1}" Text="Startup apps"/>
+            <TextBlock Style="{StaticResource PageSubtitle}"
+                       Text="Every app here launches when you sign in, slowing startup and using memory all day. Turn off anything you don't need the moment Windows starts — the app still works when you open it yourself. Changes take effect at next sign-in and also show in Task Manager."/>
+            <WrapPanel>
+                <Button x:Name="RefreshButton" Content="Refresh" Click="Refresh_Click"/>
+                <Button Content="Windows startup settings" Click="Settings_Click"/>
+                <TextBlock x:Name="Summary" VerticalAlignment="Center" Margin="8,0,0,8" FontWeight="SemiBold"/>
+            </WrapPanel>
+        </StackPanel>
+        <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource Sub}" Margin="0,8,0,0"
+                   Text="Usually safe to turn off: Spotify, Discord, Steam, Epic, Teams, Zoom, Skype, OneDrive (if you don't sync), Adobe/Office helpers, updaters. Keep on: antivirus, audio/touchpad/graphics control panels, cloud sync you rely on."/>
+        <DataGrid x:Name="Grid" SelectionMode="Single">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="On" Width="70">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox Style="{StaticResource Switch}" IsChecked="{Binding IsEnabled, Mode=OneWay}" Click="Toggle_Click"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="1.3*" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Publisher" Binding="{Binding Publisher}" Width="*" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Where" Binding="{Binding LocationText}" Width="*" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Command" Binding="{Binding Command}" Width="3*" IsReadOnly="True">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                            <Setter Property="ToolTip" Value="{Binding Command}"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsEnabled}" Value="False">
+                            <Setter Property="Opacity" Value="0.6"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding FileExists}" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource WarnBrush}"/>
+                            <Setter Property="ToolTip" Value="The program this entry points to no longer exists — safe to turn off."/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+        </DataGrid>
+    </DockPanel>
+</UserControl>

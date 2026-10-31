@@ -1,0 +1,82 @@
+<UserControl x:Class="WindowsTuner.App.Views.HealthView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="0,0,12,16">
+            <TextBlock Style="{StaticResource H1}" Text="Health &amp; repair"/>
+            <TextBlock Style="{StaticResource PageSubtitle}"
+                       Text="Built-in Windows repair tools, wrapped in one place. Output appears in the activity log."/>
+
+            <TextBlock Style="{StaticResource H2}" Text="Disks" Margin="0,0,0,8"/>
+            <DataGrid x:Name="DiskGrid" MaxHeight="170" Margin="0,0,0,8">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Disk" Binding="{Binding Name}" Width="2*" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Type" Binding="{Binding MediaType}" Width="70" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Bus" Binding="{Binding BusType}" Width="70" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Size" Binding="{Binding Size}" Width="90" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Health" Binding="{Binding Health}" Width="90" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Wear" Binding="{Binding Wear}" Width="70" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Temp" Binding="{Binding Temperature}" Width="70" IsReadOnly="True"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <TextBlock x:Name="DefenderText" Style="{StaticResource Sub}" Margin="0,4,0,8"/>
+
+            <WrapPanel>
+                <Border Style="{StaticResource Card}" Width="330">
+                    <StackPanel>
+                        <TextBlock Text="Repair Windows" FontWeight="SemiBold" FontSize="14"/>
+                        <TextBlock Style="{StaticResource Sub}" Margin="0,4,0,10" Height="70"
+                                   Text="DISM downloads clean copies of damaged Windows components, then System File Checker (SFC) repairs protected system files. Fixes many crashes, freezes and failed updates. 15–45 min."/>
+                        <Button x:Name="RepairButton" Style="{StaticResource PrimaryButton}" Content="Repair (DISM + SFC)" Click="Repair_Click" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Width="330">
+                    <StackPanel>
+                        <TextBlock Text="Virus protection" FontWeight="SemiBold" FontSize="14"/>
+                        <TextBlock Style="{StaticResource Sub}" Margin="0,4,0,10" Height="70"
+                                   Text="Update Microsoft Defender's definitions and run a quick scan of the places malware usually hides."/>
+                        <WrapPanel>
+                            <Button x:Name="DefenderButton" Content="Update &amp; quick scan" Click="Defender_Click"/>
+                            <Button Content="Windows Security" Click="Security_Click"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Width="330">
+                    <StackPanel>
+                        <TextBlock Text="Check the file system" FontWeight="SemiBold" FontSize="14"/>
+                        <TextBlock Style="{StaticResource Sub}" Margin="0,4,0,10" Height="70"
+                                   Text="Scans drive C: for file-system errors while Windows keeps running (chkdsk /scan). If it finds problems it tells you to schedule a repair at the next restart."/>
+                        <Button x:Name="ChkdskButton" Content="Scan drive C:" Click="Chkdsk_Click" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Width="330">
+                    <StackPanel>
+                        <TextBlock Text="Test memory (RAM)" FontWeight="SemiBold" FontSize="14"/>
+                        <TextBlock Style="{StaticResource Sub}" Margin="0,4,0,10" Height="70"
+                                   Text="Random freezes and blue screens are often bad RAM. Windows Memory Diagnostic tests it on the next restart (about 15 minutes)."/>
+                        <Button Content="Schedule memory test" Click="Memory_Click" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Width="330">
+                    <StackPanel>
+                        <TextBlock Text="Restore points" FontWeight="SemiBold" FontSize="14"/>
+                        <TextBlock Style="{StaticResource Sub}" Margin="0,4,0,10" Height="70"
+                                   Text="A snapshot of system settings, drivers and apps. If anything goes wrong you can roll the whole system back. Your personal files aren't affected."/>
+                        <WrapPanel>
+                            <Button x:Name="RestorePointButton" Content="Create restore point" Click="RestorePoint_Click"/>
+                            <Button Content="System Restore…" Click="SystemRestore_Click"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Width="330">
+                    <StackPanel>
+                        <TextBlock Text="Crash history" FontWeight="SemiBold" FontSize="14"/>
+                        <TextBlock Style="{StaticResource Sub}" Margin="0,4,0,10" Height="70"
+                                   Text="Reliability Monitor shows a day-by-day timeline of app crashes, failed updates and hardware errors — the fastest way to see what changed when things got slow."/>
+                        <Button Content="Open Reliability Monitor" Click="Reliability_Click" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </Border>
+            </WrapPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
