@@ -40,7 +40,7 @@
                     <CheckBox x:Name="RestorePoints" Content="Create a restore point before big changes (updates, app removal, tweak profiles)" Click="Option_Click"/>
                     <CheckBox x:Name="SystemMode" Content="Hyper-admin mode: use the SYSTEM account when administrator rights aren't enough" Click="Option_Click"/>
                     <TextBlock Style="{StaticResource Sub}" Margin="24,0,0,0"
-                               Text="Used only for fixed, safe operations: cleaning protected Windows temp/report folders, and changing vendor services or scheduled tasks that lock out administrators. WindowsTuner never runs as TrustedInstaller or switches off Windows' own protections."/>
+                               Text="Off by default. Used only for fixed, safe operations: cleaning protected Windows temp/report folders, and changing vendor services or scheduled tasks that lock out administrators. Running things as SYSTEM through Task Scheduler is also a trick malware uses, so some antivirus products may warn when this is on. WindowsTuner never runs as TrustedInstaller or switches off Windows' own protections."/>
                     <TextBlock x:Name="PrivilegeText" Margin="0,8,0,0" Style="{StaticResource Sub}"/>
                 </StackPanel>
             </Border>

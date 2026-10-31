@@ -5,6 +5,14 @@
     <UseWPF>true</UseWPF>
     <AssemblyName>WindowsTuner</AssemblyName>
     <RootNamespace>WindowsTuner.App</RootNamespace>
+    <!-- Proper version-resource details: unsigned apps with empty metadata look more suspicious to antivirus. -->
+    <Product>WindowsTuner</Product>
+    <AssemblyTitle>WindowsTuner</AssemblyTitle>
+    <Description>WindowsTuner - open-source Windows update, cleanup and tuning utility</Description>
+    <Authors>Bireshwar Chakravarty</Authors>
+    <Company>WindowsTuner (open source)</Company>
+    <Copyright>Copyright (c) 2026 Bireshwar Chakravarty. MIT License.</Copyright>
+    <NeutralLanguage>en</NeutralLanguage>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\WindowsTuner.ico</ApplicationIcon>
     <!-- Late-bound COM (Windows Update Agent) needs built-in COM interop: don't trim. -->

@@ -27,7 +27,7 @@ out-of-date PC back into shape using only Windows' own tools and official update
 
 ### "Hyper-admin" mode
 
-WindowsTuner always runs elevated (administrator). With **hyper-admin mode** (Settings, on by default) it can
+WindowsTuner always runs elevated (administrator). With **hyper-admin mode** (Settings, off by default) it can
 also run specific, fixed operations as the built-in **SYSTEM** account through a one-shot Task Scheduler job —
 for the few things an administrator is denied: protected Windows temp/report/dump folders, and vendor services
 or scheduled tasks that lock administrators out. Cleanup as SYSTEM is restricted to a whitelist of folder names
@@ -44,13 +44,44 @@ see [docs/RESEARCH.md](docs/RESEARCH.md) for the reasoning and sources.
 
 ## Get it
 
-1. Download `WindowsTuner.exe` from the latest **[Actions build](../../actions/workflows/build.yml)** (artifact
-   *WindowsTuner-win-x64*) or from **Releases** once a version is tagged.
-2. Run it. Windows asks for administrator rights (needed for updates and repairs).
-   Because the exe isn't code-signed, SmartScreen may say *"Windows protected your PC"* → **More info → Run anyway**.
-3. Start with the **Dashboard**, then **One-click Tune-up**.
+1. Download **WindowsTuner-win-x64** from the latest **[Actions build](../../actions/workflows/build.yml)**
+   (or `WindowsTuner-x64.zip` from **Releases** once a version is tagged). Use the ARM64 build only on
+   Snapdragon PCs.
+2. **Unzip the whole folder** (right-click → Extract All) — don't run it from inside the zip.
+3. Run `WindowsTuner.exe` from that folder and allow administrator access.
+4. The app isn't code-signed yet, so SmartScreen may say *"Windows protected your PC"* → **More info → Run anyway**.
 
-It's a single self-contained file (no .NET install needed). x64 and ARM64 builds are produced.
+The folder contains `WindowsTuner.exe`, `WindowsTuner.dll`, `WindowsTuner.Core.dll` and Microsoft's own
+(Microsoft-signed) .NET runtime files, so no .NET install is needed.
+
+### If Microsoft Defender or another antivirus blocks it
+
+New, unsigned tools that do system maintenance are a common **false positive**: they legitimately do things
+malware also does (run PowerShell, change services, use Task Scheduler, edit the registry). WindowsTuner is
+built so that this is as unlikely as possible:
+
+* PowerShell runs as plain, readable `.ps1` files with `-File` — never `-EncodedCommand`, never
+  `-ExecutionPolicy Bypass`.
+* Helper scripts live in `C:\ProgramData\WindowsTuner\Scripts`, locked to Administrators/SYSTEM, and are deleted
+  right after use — never in a world-writable temp folder.
+* SYSTEM-level ("hyper-admin") operations are **off by default**.
+* It ships as a normal folder rather than a compressed self-extracting `.exe`, has full version information, and
+  every CI build is scanned with Microsoft Defender.
+
+If it's still flagged:
+
+1. Check that you downloaded it from this repository's Actions/Releases page, and compare the hash with
+   `SHA256SUMS.txt`: `Get-FileHash .\WindowsTuner.exe`.
+2. Note the **threat name** shown in Windows Security → Protection history. Names ending in `!ml`
+   (e.g. `Trojan:Win32/Wacatac.B!ml`) are machine-learning guesses, the typical false positive.
+3. Report it to Microsoft as a false positive at
+   <https://www.microsoft.com/en-us/wdsi/filesubmission> (choose *Incorrectly detected as malware*). Microsoft
+   usually clears it within a day or two, for everyone.
+4. Only then, if you trust the build, use **Protection history → Actions → Allow on device**. Don't switch
+   Defender off.
+
+The real long-term fix is code signing (for example Azure Trusted Signing, or a free open-source certificate
+from SignPath.io); signed builds build up reputation with SmartScreen and Defender.
 
 ### Recommended order for a PC that's been off for months
 
@@ -98,13 +129,13 @@ Requires the .NET 10 SDK.
 
 ```bash
 dotnet test tests/WindowsTuner.Tests
-dotnet publish src/WindowsTuner.App -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+dotnet publish src/WindowsTuner.App -c Release -r win-x64 --self-contained -o publish/win-x64
 ```
 
 The engine (`WindowsTuner.Core`) targets plain `net10.0`, so its parsers, tweak engine, cleanup scanner and
 recommendation rules are unit-tested on any OS; the WPF app builds on Linux/macOS with `EnableWindowsTargeting`.
-CI runs the tests on Windows, publishes x64/ARM64 single-file builds, and launches the real app with `--smoke`
-(opens every page and saves screenshots).
+CI runs the tests on Windows, publishes x64/ARM64 builds, scans them with Microsoft Defender, and launches the
+real app with `--smoke` (opens every page and saves screenshots).
 
 Command-line switches:
 

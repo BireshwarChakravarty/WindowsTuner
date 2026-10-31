@@ -24,17 +24,44 @@ jobs:
       - name: Unit tests
         run: dotnet test tests/WindowsTuner.Tests -c Release
 
-      - name: Publish (win-x64, single file)
-        run: >
-          dotnet publish src/WindowsTuner.App -c Release -r win-x64 --self-contained true
-          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true
-          -p:DebugType=none -o publish/win-x64
+      # Published as a normal folder (WindowsTuner.exe + Microsoft-signed .NET runtime files), not a compressed
+      # self-extracting single file: unsigned self-extracting executables are a common antivirus false positive.
+      - name: Publish (win-x64)
+        run: dotnet publish src/WindowsTuner.App -c Release -r win-x64 --self-contained true -p:DebugType=none -o publish/win-x64
 
-      - name: Publish (win-arm64, single file)
-        run: >
-          dotnet publish src/WindowsTuner.App -c Release -r win-arm64 --self-contained true
-          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true
-          -p:DebugType=none -o publish/win-arm64
+      - name: Publish (win-arm64)
+        run: dotnet publish src/WindowsTuner.App -c Release -r win-arm64 --self-contained true -p:DebugType=none -o publish/win-arm64
+
+      - name: Package zips and checksums
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Compress-Archive -Path publish/win-x64/* -DestinationPath dist/WindowsTuner-x64.zip -Force
+          Compress-Archive -Path publish/win-arm64/* -DestinationPath dist/WindowsTuner-arm64.zip -Force
+          $lines = @()
+          foreach ($f in @('dist/WindowsTuner-x64.zip', 'dist/WindowsTuner-arm64.zip', 'publish/win-x64/WindowsTuner.exe', 'publish/win-x64/WindowsTuner.dll', 'publish/win-x64/WindowsTuner.Core.dll')) {
+            $lines += "$((Get-FileHash $f -Algorithm SHA256).Hash.ToLower())  $f"
+          }
+          $lines | Set-Content dist/SHA256SUMS.txt
+          Get-Content dist/SHA256SUMS.txt
+          Copy-Item dist/SHA256SUMS.txt publish/win-x64/SHA256SUMS.txt
+
+      - name: Scan with Microsoft Defender (folder build, and the old single-file style for comparison)
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          dotnet publish src/WindowsTuner.App -c Release -r win-x64 --self-contained true -p:DebugType=none `
+            -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o scan/single | Out-Null
+          $mp = Join-Path $env:ProgramFiles 'Windows Defender/MpCmdRun.exe'
+          if (-not (Test-Path $mp)) { Write-Host 'Defender not available on this runner.'; exit 0 }
+          & $mp -SignatureUpdate | Out-Null
+          $result = 0
+          foreach ($target in @("$PWD/publish/win-x64", "$PWD/scan/single/WindowsTuner.exe")) {
+            & $mp -Scan -ScanType 3 -File $target -DisableRemediation
+            Write-Host "Defender result for ${target}: exit $LASTEXITCODE (0 = clean, 2 = threat found)"
+            if ($LASTEXITCODE -ne 0) { $result = $LASTEXITCODE }
+          }
+          exit $result
 
       - name: Smoke test (opens every page on real Windows, saves screenshots)
         shell: pwsh
@@ -51,13 +78,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: WindowsTuner-win-x64
-          path: publish/win-x64/WindowsTuner.exe
+          path: publish/win-x64/
 
       - name: Upload app (ARM64)
         uses: actions/upload-artifact@v4
         with:
           name: WindowsTuner-win-arm64
-          path: publish/win-arm64/WindowsTuner.exe
+          path: publish/win-arm64/
 
       - name: Upload smoke-test logs and screenshots
         if: always()
@@ -67,18 +94,12 @@ jobs:
           path: smoke-logs/
           if-no-files-found: ignore
 
-      - name: Prepare release files
-        if: startsWith(github.ref, 'refs/tags/v')
-        shell: pwsh
-        run: |
-          Copy-Item publish/win-x64/WindowsTuner.exe WindowsTuner-x64.exe
-          Copy-Item publish/win-arm64/WindowsTuner.exe WindowsTuner-arm64.exe
-
       - name: GitHub release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            WindowsTuner-x64.exe
-            WindowsTuner-arm64.exe
+            dist/WindowsTuner-x64.zip
+            dist/WindowsTuner-arm64.zip
+            dist/SHA256SUMS.txt
           generate_release_notes: true

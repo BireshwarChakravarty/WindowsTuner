@@ -22,8 +22,11 @@ public sealed class AppSettings
 
     // Behaviour
     public bool CreateRestorePointBeforeChanges { get; set; } = true;
-    /// <summary>Allow WindowsTuner to use the SYSTEM account for protected operations ("hyper admin").</summary>
-    public bool UseSystemAccount { get; set; } = true;
+    /// <summary>
+    /// Allow WindowsTuner to use the SYSTEM account for protected operations ("hyper admin"). Opt-in: creating
+    /// SYSTEM scheduled tasks is legitimate here but resembles what malware does, so antivirus may react to it.
+    /// </summary>
+    public bool UseSystemAccount { get; set; }
     public bool ScheduledTuneUpEnabled { get; set; }
     public DayOfWeek ScheduleDay { get; set; } = DayOfWeek.Sunday;
     public int ScheduleHour { get; set; } = 12;
