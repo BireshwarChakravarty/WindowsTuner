@@ -84,7 +84,9 @@ public static class SystemInfoService
     {
         var letter = (Environment.GetEnvironmentVariable("SystemDrive") ?? "C:").TrimEnd(':', '\\');
         var r = await PowerShell.RunAsync(
-            $"$p = Get-Partition -DriveLetter {letter} -ErrorAction SilentlyContinue | Get-Disk | Get-PhysicalDisk -ErrorAction SilentlyContinue; if ($p) {{ [string]$p.MediaType }}");
+            $"$n = (Get-Partition -DriveLetter {letter} -ErrorAction SilentlyContinue).DiskNumber; " +
+            "$p = Get-PhysicalDisk -ErrorAction SilentlyContinue | Where-Object { $_.DeviceId -eq [string]$n } | Select-Object -First 1; " +
+            "if ($p) { [string]$p.MediaType }");
         var v = r.StdOut.Trim();
         return v switch
         {

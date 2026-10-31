@@ -60,7 +60,7 @@ public static class TuneUpSteps
         new() { Id = Apps, Name = "Update all apps (winget)", Description = "Chrome, Zoom, VLC, 7-Zip, Steam… everything winget knows about.", Duration = "2–20 min" },
         new() { Id = Store, Name = "Update Microsoft Store apps", Description = "Asks the Store to update its apps in the background.", Duration = "<1 min" },
         new() { Id = Windows, Name = "Install Windows updates", Description = "Security and quality updates from Windows Update.", Duration = "5–60 min" },
-        new() { Id = Drivers, Name = "Install driver updates", Description = "Drivers your hardware makers publish on Windows Update.", Duration = "2–15 min" },
+        new() { Id = Drivers, Name = "Install driver updates", Description = "Recommended drivers your hardware makers publish on Windows Update (optional ones are left for you to pick on the Updates page).", Duration = "2–15 min" },
         new() { Id = Drives, Name = "Optimize drives", Description = "TRIM for SSDs, defragment for hard disks.", Duration = "1–30 min" },
         new() { Id = Components, Name = "Clean up Windows components", Description = "Removes superseded update files from WinSxS (slow; old updates can't be uninstalled afterwards).", Duration = "5–30 min" },
         new() { Id = Repair, Name = "Repair Windows system files", Description = "DISM RestoreHealth + SFC — fixes corruption that causes crashes and slowness.", Duration = "15–45 min" },
@@ -169,7 +169,7 @@ public sealed class TuneUpRunner(AppSettings settings)
             case TuneUpSteps.Drivers:
                 var drivers = step.Id == TuneUpSteps.Drivers;
                 var found = (await _wu.SearchAsync(includeDrivers: drivers, includeOptional: false, ct))
-                    .Where(u => drivers ? u.IsDriver : !u.IsDriver && !u.IsOptional)
+                    .Where(u => u.IsDriver == drivers && !u.IsOptional)
                     .ToList();
                 if (found.Count == 0) { step.Detail = drivers ? "No driver updates" : "Windows is up to date"; return StepOutcome.Done; }
                 var summary = await _wu.InstallAsync(found, ct: ct);

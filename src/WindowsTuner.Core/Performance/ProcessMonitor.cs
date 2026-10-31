@@ -17,7 +17,10 @@ public sealed class ProcessUsage : ObservableObject
 /// <summary>A quick "what is slowing my PC down right now" snapshot.</summary>
 public static class ProcessMonitor
 {
-    public static async Task<IReadOnlyList<ProcessUsage>> SnapshotAsync(TimeSpan sample, CancellationToken ct = default)
+    public static Task<IReadOnlyList<ProcessUsage>> SnapshotAsync(TimeSpan sample, CancellationToken ct = default) =>
+        Task.Run(() => SnapshotCoreAsync(sample, ct), ct);
+
+    private static async Task<IReadOnlyList<ProcessUsage>> SnapshotCoreAsync(TimeSpan sample, CancellationToken ct)
     {
         var first = new Dictionary<int, TimeSpan>();
         foreach (var p in Process.GetProcesses())
@@ -26,7 +29,7 @@ public static class ProcessMonitor
             finally { p.Dispose(); }
         }
         var sw = Stopwatch.StartNew();
-        await Task.Delay(sample, ct);
+        await Task.Delay(sample, ct).ConfigureAwait(false);
         var elapsed = sw.Elapsed.TotalMilliseconds * Environment.ProcessorCount;
 
         // Group per executable name so 30 browser processes show as one row.

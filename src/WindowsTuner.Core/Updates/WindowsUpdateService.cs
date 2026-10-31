@@ -21,7 +21,7 @@ public sealed class WindowsUpdateItem : ObservableObject
     public DateTime? DriverDate { get; init; }
     public string Description { get; init; } = "";
 
-    public string Kind => IsDriver ? "Driver" : IsOptional ? "Optional" : "Windows";
+    public string Kind => IsDriver ? (IsOptional ? "Driver (optional)" : "Driver") : IsOptional ? "Optional" : "Windows";
     public string Size => SizeBytes > 0 ? Format.Bytes(SizeBytes) : "";
 
     /// <summary>The live COM IUpdate object (late bound).</summary>
@@ -71,7 +71,9 @@ public sealed class WindowsUpdateService
                 dynamic u = updates[i];
                 var item = Map(u);
                 if (item.IsOptional && !includeOptional && !item.IsDriver) continue;
-                item.IsSelected = !item.IsOptional || item.IsDriver;
+                // Microsoft's guidance for optional drivers: only install them if you have a problem with that device.
+                item.IsSelected = !item.IsOptional;
+                if (item.IsOptional && item.IsDriver) item.Message = "Optional — install if this device has problems";
                 items.Add(item);
             }
             Log.Info($"Windows Update found {items.Count} update(s) ({items.Count(x => x.IsDriver)} driver).");
