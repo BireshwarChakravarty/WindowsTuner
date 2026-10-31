@@ -120,7 +120,32 @@ WindowsTuner talks to the same engine as the Settings app — the Windows Update
   Store apps, etc. WindowsTuner offers only a handful of well-understood service tweaks, marked Moderate/Advanced.
 * **Third-party driver updaters.** See section 4.
 
-## 7. Safety design
+## 7. Beyond Windows: the rest of the PC
+
+| Area | Why it matters | Mechanism |
+|---|---|---|
+| **Microsoft Office / 365** | Office updates through its own Click-to-Run service, not winget | `OfficeC2RClient.exe /update user …` |
+| **WSL, Chocolatey, Scoop, PowerShell modules, npm** | Each has its own package channel | `wsl --update`, `choco upgrade all -y`, `scoop update *`, `Update-Module`, `npm update -g` (npm off by default) |
+| **Firmware / BIOS** | Fixes stability, security and power bugs | Windows Update (firmware is delivered as a driver) + the PC maker's tool; BIOS date shown on Health / flagged when > 3 years |
+| **Hidden startup items** | Updaters and helpers register **scheduled tasks** and **services**, which Task Manager's Startup tab doesn't show | `Get-ScheduledTask` (non-`\Microsoft\` paths), `Win32_Service` filtered to non-Microsoft binaries; changes via `Disable-ScheduledTask` / `sc config` with an undo journal |
+| **Installed programs & big files** | Old programs and forgotten installers/ISOs/videos are the biggest space hogs after junk | Uninstall registry keys (HKLM 64/32-bit, HKCU); file scan skips OneDrive online-only placeholders; deletes go to the Recycle Bin |
+| **DNS** | Every page load starts with a DNS lookup; ISP resolvers are often slower | Raw UDP DNS queries timed against each provider; `Set-DnsClientServerAddress` / `-ResetServerAddresses` |
+| **Network repair** | "Connected, no internet" is usually a corrupted stack or stale cache | `ipconfig /flushdns`, `netsh winsock reset`, `netsh int ip reset` |
+| **Security posture** | A PC off for months is at its most vulnerable | Firewall, Defender (real-time, tamper, definitions), UAC, SMBv1, WU pause, Secure Boot, TPM, BitLocker, RDP, auto-logon, Guest, SmartScreen, memory integrity |
+| **Stability history** | Slowness often comes with crashes that point to the real cause | Event logs, 30 days: Kernel-Power 41, BugCheck 1001, disk 7/51/153, NTFS 55/98, WHEA-Logger, Application Error 1000, Diagnostics-Performance 100 (boot time) |
+| **Battery** | A worn battery makes laptops throttle and die early | `powercfg /batteryreport /xml` → full-charge vs design capacity |
+
+### Privilege levels ("hyper admin")
+
+* **Administrator (elevated)** — what WindowsTuner always runs as (manifest `requireAdministrator`). Enough for
+  Windows Update, winget, DISM/SFC, HKLM tweaks, services, scheduled tasks.
+* **SYSTEM** — used through a one-shot scheduled task only when admin is denied: protected cleanup folders
+  (whitelisted leaf names inside `C:\Windows` / `C:\ProgramData`), vendor-locked services/tasks.
+* **TrustedInstaller** — deliberately not used. It exists to protect Windows' own files; running as it lets a tool
+  delete or replace system components, which is how "optimizers" break Windows Update and SFC. Even it can't
+  bypass Defender Tamper Protection or the user-choice protection driver, so it buys nothing for speed.
+
+## 8. Safety design
 
 * **Restore point first.** Before batches of changes (Tune-up, many app updates, Windows updates, app removal,
   recommended tweaks, profiles) a System Restore point is created. Windows normally allows one per 24 h;

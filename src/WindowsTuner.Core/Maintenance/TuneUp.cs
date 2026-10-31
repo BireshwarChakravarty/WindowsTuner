@@ -42,13 +42,14 @@ public static class TuneUpSteps
     public const string Cleanup = "cleanup";
     public const string Apps = "apps";
     public const string Store = "store";
+    public const string OtherSoftware = "other-software";
     public const string Windows = "windows-update";
     public const string Drivers = "drivers";
     public const string Drives = "optimize-drives";
     public const string Components = "component-cleanup";
     public const string Repair = "repair";
 
-    public static readonly string[] Defaults = [RestorePoint, Defender, Cleanup, Apps, Store, Windows, Drivers, Drives];
+    public static readonly string[] Defaults = [RestorePoint, Defender, Cleanup, Apps, Store, OtherSoftware, Windows, Drivers, Drives];
 
     public static IReadOnlyList<TuneUpStep> Create(ICollection<string> selected)
     {
@@ -59,6 +60,7 @@ public static class TuneUpSteps
         new() { Id = Cleanup, Name = "Clean junk files", Description = "Temp files, update leftovers and error reports.", Duration = "1–3 min" },
         new() { Id = Apps, Name = "Update all apps (winget)", Description = "Chrome, Zoom, VLC, 7-Zip, Steam… everything winget knows about.", Duration = "2–20 min" },
         new() { Id = Store, Name = "Update Microsoft Store apps", Description = "Asks the Store to update its apps in the background.", Duration = "<1 min" },
+        new() { Id = OtherSoftware, Name = "Update everything else", Description = "Microsoft Office, WSL, Chocolatey, Scoop and PowerShell modules — whatever is installed.", Duration = "1–15 min" },
         new() { Id = Windows, Name = "Install Windows updates", Description = "Security and quality updates from Windows Update.", Duration = "5–60 min" },
         new() { Id = Drivers, Name = "Install driver updates", Description = "Recommended drivers your hardware makers publish on Windows Update (optional ones are left for you to pick on the Updates page).", Duration = "2–15 min" },
         new() { Id = Drives, Name = "Optimize drives", Description = "TRIM for SSDs, defragment for hard disks.", Duration = "1–30 min" },
@@ -164,6 +166,14 @@ public sealed class TuneUpRunner(AppSettings settings)
                 var st = await StoreUpdateService.TriggerStoreUpdatesAsync(ct);
                 step.Detail = st ? "Store is updating apps in the background" : "Open the Store → Library → Get updates";
                 return st ? StepOutcome.Done : StepOutcome.Warning;
+
+            case TuneUpSteps.OtherSoftware:
+                var sources = ExtraUpdateService.CreateSources().Where(x => x.Id is not ("store" or "defender-platform")).ToList();
+                ExtraUpdateService.DetectAll(sources);
+                if (!sources.Any(x => x.IsSelected)) { step.Detail = "Nothing else to update"; return StepOutcome.Done; }
+                var (eok, efail) = await ExtraUpdateService.UpdateAsync(sources, ct);
+                step.Detail = string.Join(", ", sources.Where(x => x.IsSelected).Select(x => x.Name.Split(' ')[0])) + $": {eok} OK" + (efail > 0 ? $", {efail} with warnings" : "");
+                return efail > 0 ? StepOutcome.Warning : StepOutcome.Done;
 
             case TuneUpSteps.Windows:
             case TuneUpSteps.Drivers:

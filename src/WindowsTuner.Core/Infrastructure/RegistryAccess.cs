@@ -17,6 +17,7 @@ public interface IRegistryAccess
     void DeleteKey(RegHive hive, string path);
     bool KeyExists(RegHive hive, string path);
     IReadOnlyList<string> GetValueNames(RegHive hive, string path);
+    IReadOnlyList<string> GetSubKeyNames(RegHive hive, string path);
 }
 
 public static class RegHiveParser
@@ -113,6 +114,13 @@ public sealed class WindowsRegistry : IRegistryAccess
         using var key = root.OpenSubKey(path, writable: false);
         return key?.GetValueNames() ?? [];
     }
+
+    public IReadOnlyList<string> GetSubKeyNames(RegHive hive, string path)
+    {
+        using var root = Base(hive);
+        using var key = root.OpenSubKey(path, writable: false);
+        return key?.GetSubKeyNames() ?? [];
+    }
 }
 
 /// <summary>In-memory registry used by unit tests (and handy for dry runs).</summary>
@@ -153,4 +161,12 @@ public sealed class InMemoryRegistry : IRegistryAccess
 
     public IReadOnlyList<string> GetValueNames(RegHive hive, string path) =>
         _keys.TryGetValue(K(hive, path), out var values) ? values.Keys.ToList() : [];
+
+    public IReadOnlyList<string> GetSubKeyNames(RegHive hive, string path)
+    {
+        var prefix = K(hive, path) + "\\";
+        return _keys.Keys.Where(k => k.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            .Select(k => k[prefix.Length..].Split('\\')[0])
+            .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+    }
 }

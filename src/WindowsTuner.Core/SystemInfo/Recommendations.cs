@@ -5,7 +5,7 @@ namespace WindowsTuner.Core.SystemInfo;
 public enum Severity { Good, Info, Warning, Critical }
 
 /// <summary>Navigation target in the UI that fixes the issue.</summary>
-public enum FixPage { None, Updates, Drivers, Cleanup, Startup, Tweaks, Performance, Health, Apps, TuneUp, Restart }
+public enum FixPage { None, Updates, Drivers, Cleanup, Startup, Tweaks, Performance, Health, Apps, TuneUp, Restart, Security, Network, Programs, Background }
 
 public sealed record Recommendation(Severity Severity, string Title, string Detail, FixPage Fix = FixPage.None)
 {
@@ -121,6 +121,34 @@ public static class RecommendationEngine
         if (s.AnyDiskUnhealthy)
             list.Add(new(Severity.Critical, "A disk reports a health problem",
                 "Back up your files now. A failing disk also causes freezes and extreme slowness.", FixPage.Health));
+
+        if (s.BlueScreens > 0)
+            list.Add(new(Severity.Critical, $"{s.BlueScreens} blue screen crash(es) in the last 30 days",
+                "Usually a faulty driver or RAM. Install driver updates, then run the memory test on the Health page.", FixPage.Health));
+        if (s.DiskErrors > 0)
+            list.Add(new(Severity.Critical, $"{s.DiskErrors} disk error(s) in the last 30 days",
+                "The disk is reporting read/write failures. Back up your files today and check disk health.", FixPage.Health));
+        if (s.HardwareErrors > 0)
+            list.Add(new(Severity.Warning, $"{s.HardwareErrors} hardware error(s) logged",
+                "CPU, memory or PCIe errors (WHEA). Common causes: overheating, overclocking, or a BIOS that needs updating.", FixPage.Health));
+        if (s.UnexpectedShutdowns > 2)
+            list.Add(new(Severity.Warning, $"{s.UnexpectedShutdowns} unexpected shutdowns in 30 days",
+                "Power cuts, forced power-offs, overheating or a weak power supply. Check that fans and vents are clean.", FixPage.Health));
+        if (s.BootSeconds is > 60)
+            list.Add(new(Severity.Warning, $"Startup takes {s.BootSeconds:0} seconds",
+                "Disable startup apps and hidden background tasks you don't need.", FixPage.Background));
+        if (s.SecurityProblems > 0)
+            list.Add(new(Severity.Critical, $"{s.SecurityProblems} security setting(s) need fixing",
+                "Something important like the firewall, antivirus or UAC is off. Fix it in one click on the Security page.", FixPage.Security));
+        else if (s.SecurityWarnings > 0)
+            list.Add(new(Severity.Info, $"{s.SecurityWarnings} security setting(s) could be stronger",
+                "See the Security page for details.", FixPage.Security));
+        if (s.BatteryHealthPercent is < 70)
+            list.Add(new(Severity.Warning, $"Battery holds only {s.BatteryHealthPercent:0}% of its original charge",
+                "Expect much shorter battery life. A replacement battery is cheap for most laptops.", FixPage.Health));
+        if (s.BiosDate is { } bios && (DateTime.Today - bios).TotalDays > 3 * 365)
+            list.Add(new(Severity.Info, $"BIOS/UEFI firmware is from {bios:yyyy}",
+                "Firmware updates fix stability, security and compatibility bugs. Check your PC or motherboard maker's support tool (Drivers page).", FixPage.Drivers));
 
         if (list.Count == 0 || list.All(r => r.Severity == Severity.Info))
             list.Add(new(Severity.Good, "Looking good", "No problems found. Run a Tune-up now and then to keep it that way.", FixPage.TuneUp));

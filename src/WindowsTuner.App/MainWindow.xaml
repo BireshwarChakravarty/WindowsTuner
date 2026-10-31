@@ -39,11 +39,15 @@
                         <TextBlock Text="KEEP UP TO DATE" FontSize="11" Margin="22,14,0,4" Foreground="{DynamicResource SubTextBrush}"/>
                         <RadioButton Style="{StaticResource NavButton}" Tag="&#xE895;" Content="Updates" x:Name="NavUpdates" Click="Nav_Click"/>
                         <RadioButton Style="{StaticResource NavButton}" Tag="&#xE772;" Content="Drivers" x:Name="NavDrivers" Click="Nav_Click"/>
+                        <RadioButton Style="{StaticResource NavButton}" Tag="&#xE72E;" Content="Security" x:Name="NavSecurity" Click="Nav_Click"/>
                         <TextBlock Text="SPEED UP" FontSize="11" Margin="22,14,0,4" Foreground="{DynamicResource SubTextBrush}"/>
                         <RadioButton Style="{StaticResource NavButton}" Tag="&#xE74D;" Content="Clean up" x:Name="NavCleanup" Click="Nav_Click"/>
                         <RadioButton Style="{StaticResource NavButton}" Tag="&#xE768;" Content="Startup apps" x:Name="NavStartup" Click="Nav_Click"/>
+                        <RadioButton Style="{StaticResource NavButton}" Tag="&#xE9F5;" Content="Background tasks" x:Name="NavBackground" Click="Nav_Click"/>
                         <RadioButton Style="{StaticResource NavButton}" Tag="&#xE71D;" Content="Remove bloat" x:Name="NavApps" Click="Nav_Click"/>
+                        <RadioButton Style="{StaticResource NavButton}" Tag="&#xE8B7;" Content="Programs &amp; files" x:Name="NavPrograms" Click="Nav_Click"/>
                         <RadioButton Style="{StaticResource NavButton}" Tag="&#xEC4A;" Content="Performance" x:Name="NavPerformance" Click="Nav_Click"/>
+                        <RadioButton Style="{StaticResource NavButton}" Tag="&#xE968;" Content="Network" x:Name="NavNetwork" Click="Nav_Click"/>
                         <TextBlock Text="MAKE IT YOURS" FontSize="11" Margin="22,14,0,4" Foreground="{DynamicResource SubTextBrush}"/>
                         <RadioButton Style="{StaticResource NavButton}" Tag="&#xE771;" Content="Tweaks" x:Name="NavTweaks" Click="Nav_Click"/>
                         <RadioButton Style="{StaticResource NavButton}" Tag="&#xE9D9;" Content="Health &amp; repair" x:Name="NavHealth" Click="Nav_Click"/>

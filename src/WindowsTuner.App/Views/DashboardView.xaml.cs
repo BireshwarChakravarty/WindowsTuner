@@ -1,7 +1,9 @@
 using System.Windows;
 using System.Windows.Controls;
 using WindowsTuner.App.Helpers;
+using WindowsTuner.Core.Diagnostics;
 using WindowsTuner.Core.Drivers;
+using WindowsTuner.Core.Security;
 using WindowsTuner.Core.Health;
 using WindowsTuner.Core.Infrastructure;
 using WindowsTuner.Core.Startup;
@@ -35,6 +37,10 @@ public partial class DashboardView : UserControl, IPage
         var disks = HealthService.GetDiskHealthAsync(ct);
         var startup = Task.Run(() => new StartupService().GetItems().Count(i => i.IsEnabled), ct);
         var devices = Task.Run(async () => (await new DriverService().GetProblemDevicesAsync(ct)).Count, ct);
+        var events = EventLogReport.CollectAsync(ct);
+        var security = SecurityCheckup.RunAsync(ct);
+        var battery = BatteryReport.GetAsync(ct);
+        var hardware = new DriverService().GetHardwareAsync();
 
         s.CpuLoadPercent = await cpu;
         s.SystemDriveMedia = await media;
@@ -47,6 +53,23 @@ public partial class DashboardView : UserControl, IPage
             s.DefenderSignatureAgeDays = d.SignatureAgeDays;
         }
         s.AnyDiskUnhealthy = (await disks).Any(x => !x.IsHealthy && x.Health != "Unknown");
+        if (await events is { } ev)
+        {
+            s.BlueScreens = ev.BlueScreens;
+            s.UnexpectedShutdowns = ev.UnexpectedShutdowns;
+            s.DiskErrors = ev.DiskErrors + ev.FileSystemErrors;
+            s.HardwareErrors = ev.HardwareErrors;
+            s.BootSeconds = ev.LastBootSeconds;
+        }
+        var checks = await security;
+        if (checks.Count > 0)
+        {
+            s.SecurityProblems = checks.Count(c => c.Status == CheckStatus.Bad);
+            s.SecurityWarnings = checks.Count(c => c.Status == CheckStatus.Warning);
+        }
+        var bats = await battery;
+        if (bats.Count > 0) s.BatteryHealthPercent = bats.Min(b => b.HealthPercent);
+        s.BiosDate = (await hardware).BiosDate;
 
         if (deep)
         {

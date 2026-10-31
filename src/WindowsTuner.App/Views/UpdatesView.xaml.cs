@@ -14,6 +14,7 @@ public partial class UpdatesView : UserControl, IPage
     private readonly WindowsUpdateService _wu = new();
     private ObservableCollection<AppUpdate> _apps = [];
     private ObservableCollection<WindowsUpdateItem> _updates = [];
+    private readonly IReadOnlyList<ExtraUpdateSource> _extra = ExtraUpdateService.CreateSources();
 
     public UpdatesView()
     {
@@ -25,6 +26,8 @@ public partial class UpdatesView : UserControl, IPage
 
     public async Task OnNavigatedToAsync()
     {
+        await Task.Run(() => ExtraUpdateService.DetectAll(_extra));
+        ExtraList.ItemsSource = _extra.OrderByDescending(x => x.IsInstalled).ToList();
         MicrosoftUpdate.IsChecked = await Task.Run(WindowsUpdateService.IsMicrosoftUpdateEnabled);
     }
 
@@ -148,6 +151,22 @@ public partial class UpdatesView : UserControl, IPage
     {
         var enable = MicrosoftUpdate.IsChecked == true;
         _ = Ui.RunAsync("Changing Microsoft Update setting", _ => WindowsUpdateService.SetMicrosoftUpdateEnabledAsync(enable), MicrosoftUpdate);
+    }
+
+    private void ExtraDetect_Click(object sender, RoutedEventArgs e)
+    {
+        ExtraUpdateService.DetectAll(_extra);
+        ExtraList.ItemsSource = _extra.OrderByDescending(x => x.IsInstalled).ToList();
+    }
+
+    private void ExtraUpdate_Click(object sender, RoutedEventArgs e)
+    {
+        MainWindow.Current?.ShowLog();
+        _ = Ui.RunAsync("Updating other software", async ct =>
+        {
+            var (ok, failed) = await ExtraUpdateService.UpdateAsync(_extra, ct);
+            ExtraSummary.Text = $"Finished: {ok} updated" + (failed > 0 ? $", {failed} with warnings (see log)." : ".");
+        }, ExtraUpdateButton);
     }
 
     private void WuSettings_Click(object sender, RoutedEventArgs e) => WindowsUpdateService.OpenSettings();

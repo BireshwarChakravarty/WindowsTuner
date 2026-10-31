@@ -1,6 +1,8 @@
 using System.Windows;
 using System.Windows.Controls;
 using WindowsTuner.App.Helpers;
+using WindowsTuner.Core.Diagnostics;
+using WindowsTuner.Core.Drivers;
 using WindowsTuner.Core.Health;
 using WindowsTuner.Core.Infrastructure;
 using WindowsTuner.Core.Safety;
@@ -18,6 +20,18 @@ public partial class HealthView : UserControl, IPage
         DefenderText.Text = d is null
             ? "Microsoft Defender status unavailable (another antivirus may be installed)."
             : $"Microsoft Defender: real-time protection {(d.RealTimeOn ? "on" : "OFF")}, definitions {(d.SignatureAgeDays <= 0 ? "up to date" : d.SignatureAgeDays + " day(s) old")}.";
+
+        var events = await EventLogReport.CollectAsync(ct);
+        Findings.ItemsSource = events?.Findings().Select(f => new { f.Problem, f.Text }).ToList();
+
+        var batteries = await BatteryReport.GetAsync(ct);
+        BatteryText.Text = batteries.Count == 0 ? "" : "🔋 " + string.Join(" · ", batteries.Select(b => b.Summary));
+        if (batteries.Any(b => b.HealthPercent < 70)) BatteryText.Foreground = (System.Windows.Media.Brush)FindResource("WarnBrush");
+
+        var hw = await new DriverService().GetHardwareAsync();
+        BiosText.Text = hw.BiosVersion.Length > 0
+            ? $"BIOS/UEFI {hw.BiosVersion}" + (hw.BiosDate is { } bd ? $" from {bd:yyyy-MM-dd}" : "") + " — firmware updates come from your PC/motherboard maker (see Drivers)."
+            : "";
     });
 
     private void Repair_Click(object sender, RoutedEventArgs e)

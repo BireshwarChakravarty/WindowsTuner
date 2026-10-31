@@ -151,6 +151,20 @@ public sealed class CleanupService
                     break;
             }
 
+            // "Hyper admin": files even an elevated admin can't delete are retried as SYSTEM (fixed, whitelisted folders only).
+            if (r.FilesSkipped > 0 && t.NeedsAdmin && t.Kind == CleanupKind.Files && SystemRunner.Enabled)
+            {
+                var dirs = t.Paths.SelectMany(FileScanner.ExpandPattern).Where(SystemRunner.IsSafeSystemCleanupFolder).ToList();
+                if (dirs.Count > 0)
+                {
+                    var (beforeBytes, _) = FileScanner.Measure(dirs, t.FilePattern, t.MinAge, ct);
+                    foreach (var dir in dirs)
+                        await SystemRunner.CleanFolderAsync(dir, (int)Math.Ceiling(t.MinAge.TotalDays), ct);
+                    var (afterBytes, afterFiles) = FileScanner.Measure(dirs, t.FilePattern, t.MinAge, ct);
+                    r = new CleanResult(r.BytesFreed + Math.Max(0, beforeBytes - afterBytes), r.FilesDeleted, afterFiles);
+                }
+            }
+
             freed += r.BytesFreed;
             deleted += r.FilesDeleted;
             skipped += r.FilesSkipped;

@@ -22,11 +22,18 @@ public sealed class AppSettings
 
     // Behaviour
     public bool CreateRestorePointBeforeChanges { get; set; } = true;
+    /// <summary>Allow WindowsTuner to use the SYSTEM account for protected operations ("hyper admin").</summary>
+    public bool UseSystemAccount { get; set; } = true;
     public bool ScheduledTuneUpEnabled { get; set; }
     public DayOfWeek ScheduleDay { get; set; } = DayOfWeek.Sunday;
     public int ScheduleHour { get; set; } = 12;
 
-    public static AppSettings Load() => JsonFile.Read<AppSettings>(AppPaths.SettingsFile) ?? new AppSettings();
+    public static AppSettings Load()
+    {
+        var s = JsonFile.Read<AppSettings>(AppPaths.SettingsFile) ?? new AppSettings();
+        SystemRunner.Enabled = s.UseSystemAccount;
+        return s;
+    }
 
     public void Save()
     {

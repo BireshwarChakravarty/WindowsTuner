@@ -1,0 +1,93 @@
+<UserControl x:Class="WindowsTuner.App.Views.NetworkView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="0,0,12,16">
+            <TextBlock Style="{StaticResource H1}" Text="Network"/>
+            <TextBlock Style="{StaticResource PageSubtitle}"
+                       Text="Every website starts with a DNS lookup. A faster DNS provider makes pages start loading sooner, and some block malware sites. Repairs here fix most &quot;connected but no internet&quot; problems."/>
+
+            <WrapPanel>
+                <Button x:Name="BenchButton" Style="{StaticResource PrimaryButton}" Content="Test DNS speed" Click="Bench_Click"/>
+                <Button x:Name="ResetDnsButton" Content="Use automatic DNS (router)" Click="ResetDns_Click"/>
+                <TextBlock x:Name="PingText" VerticalAlignment="Center" Margin="8,0,0,8" Style="{StaticResource Sub}"/>
+            </WrapPanel>
+            <DataGrid x:Name="DnsGrid" Margin="0,0,0,12" MinHeight="120" SelectionMode="Single">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Provider" Binding="{Binding Name}" Width="1.3*" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Response" Binding="{Binding Speed}" Width="90" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Servers" Binding="{Binding Servers}" Width="1.5*" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="About" Binding="{Binding Note}" Width="2*" IsReadOnly="True"/>
+                    <DataGridTemplateColumn Header="" Width="110">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Use this" Click="UseDns_Click" Padding="10,2" Margin="0">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsFastest}" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource GoodBrush}"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+            </DataGrid>
+
+            <TextBlock Style="{StaticResource H2}" Text="Connected adapters"/>
+            <DataGrid x:Name="AdapterGrid" MaxHeight="160" Margin="0,0,0,12">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Adapter" Binding="{Binding Description}" Width="2*" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="100" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Link speed" Binding="{Binding Speed}" Width="90" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="IP address" Binding="{Binding IPv4}" Width="*" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="DNS" Binding="{Binding Dns}" Width="1.5*" IsReadOnly="True"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <WrapPanel>
+                <Border Style="{StaticResource Card}" Width="330">
+                    <StackPanel>
+                        <TextBlock Text="Flush DNS cache" FontWeight="SemiBold" FontSize="14"/>
+                        <TextBlock Style="{StaticResource Sub}" Margin="0,4,0,10" Height="52"
+                                   Text="Fixes sites that moved or won't load while others work. Instant and harmless."/>
+                        <Button x:Name="FlushButton" Content="Flush DNS" Click="Flush_Click" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Width="330">
+                    <StackPanel>
+                        <TextBlock Text="Reset network stack" FontWeight="SemiBold" FontSize="14"/>
+                        <TextBlock Style="{StaticResource Sub}" Margin="0,4,0,10" Height="52"
+                                   Text="Resets Winsock and TCP/IP to defaults — the standard fix for broken connections. Needs a restart."/>
+                        <Button x:Name="ResetStackButton" Content="Reset network" Click="ResetStack_Click" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Width="330">
+                    <StackPanel>
+                        <TextBlock Text="More" FontWeight="SemiBold" FontSize="14"/>
+                        <WrapPanel Margin="0,8,0,0">
+                            <Button Content="Network settings" Click="NetSettings_Click"/>
+                            <Button Content="Network troubleshooter" Click="Troubleshoot_Click"/>
+                            <Button Content="Data usage" Click="DataUsage_Click"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+            </WrapPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -11,15 +11,29 @@ out-of-date PC back into shape using only Windows' own tools and official update
 |---|---|
 | **Dashboard** | Health score, CPU / RAM / disk / uptime, and a prioritized "what to do next" list with one-click fixes (pending restart, Windows 10 end-of-support, full disk, HDD, too many startup apps, out-of-date apps, stale virus definitions, failing disks…). |
 | **One-click Tune-up** | Restore point → Defender definitions → junk cleanup → **all app updates** → Store app updates → **Windows updates** → **driver updates** → drive optimization (optional: component cleanup, DISM+SFC repair). Can run **weekly in the background**. |
-| **Updates** | App updates through **winget** (Chrome, Zoom, 7-Zip, Steam, VLC… thousands of apps) with select / update all / skip-forever; Microsoft Store updates; **Windows Update and driver updates** through the Windows Update Agent API; optional "other Microsoft products" (Office). |
+| **Updates** | App updates through **winget** (Chrome, Zoom, 7-Zip, Steam, VLC… thousands of apps) with select / update all / skip-forever; Microsoft Store updates; **Windows Update and driver updates** through the Windows Update Agent API; optional "other Microsoft products". **Everything else** tab: Microsoft Office / 365 (Click-to-Run), Defender engine, WSL, Chocolatey, Scoop, PowerShell modules, npm globals. |
+| **Security** | One-page checkup: firewall, real-time protection, definitions age, tamper protection, UAC, SMBv1, paused Windows Update, Secure Boot, TPM, BitLocker, Remote Desktop, auto sign-in, Guest account, SmartScreen, memory integrity — with one-click fixes. |
 | **Drivers** | Problem devices with plain-English error codes, all third-party drivers with age, links to the *official* vendor tools for your exact hardware (NVIDIA / AMD / Intel / Dell / Lenovo / HP / ASUS…), driver backup, hardware rescan. |
 | **Clean up** | Temp files, Windows Update cache, Delivery Optimization, error reports, crash dumps, thumbnail / browser / shader caches, Recycle Bin; WinSxS component cleanup. Shows sizes before deleting. |
 | **Startup apps** | Turn startup apps on/off (same mechanism as Task Manager), with publisher and broken-entry detection. |
+| **Background tasks** | The hidden startup items Task Manager doesn't show: third-party **scheduled tasks** (toggle on/off) and **services** (Automatic / Manual / Disabled, "set all updaters to Manual", restore originals). |
+| **Programs & files** | Every installed desktop program with size and install date, sort/search, run its uninstaller; **large-file finder** across your user folders and **old installers** in Downloads, sent to the Recycle Bin. |
+| **Network** | DNS speed test (your DNS vs Cloudflare, Google, Quad9, OpenDNS, Cloudflare Family) and one-click switch/reset; flush DNS; reset Winsock/TCP-IP; adapter overview. |
 | **Remove bloat** | Remove preinstalled Store apps (News, Solitaire, Clipchamp, Candy Crush…) with ratings; system apps are protected. |
 | **Performance** | Live "what's using my PC" (grouped by app), end tasks, power plans incl. Ultimate Performance, TRIM/defrag. |
 | **Tweaks** | 50+ reversible tweaks across Explorer, Taskbar & Start, Privacy & Ads, Performance, Gaming, Appearance, Windows Update, Services and Input. Search, categories, risk levels, ★ recommended preset, **save/load profiles**, **add your own tweaks** in JSON, **undo everything**. |
-| **Health & repair** | Disk health (SMART wear/temperature), DISM + SFC repair, Defender update & quick scan, chkdsk online scan, memory test, restore points, Reliability Monitor. |
+| **Health & repair** | What the **event logs** say about the last 30 days (blue screens, unexpected shutdowns, disk / file-system / WHEA hardware errors, top crashing apps, boot time), **battery wear**, BIOS age, disk health (SMART wear/temperature), DISM + SFC repair, Defender update & quick scan, chkdsk online scan, memory test, restore points, Reliability Monitor. |
 | **Settings** | Dark / light / follow-Windows theme, any accent colour, skip list, restore-point behaviour. |
+
+### "Hyper-admin" mode
+
+WindowsTuner always runs elevated (administrator). With **hyper-admin mode** (Settings, on by default) it can
+also run specific, fixed operations as the built-in **SYSTEM** account through a one-shot Task Scheduler job —
+for the few things an administrator is denied: protected Windows temp/report/dump folders, and vendor services
+or scheduled tasks that lock administrators out. Cleanup as SYSTEM is restricted to a whitelist of folder names
+inside `C:\Windows` / `C:\ProgramData`. It deliberately does **not** run as TrustedInstaller or disable Windows'
+own protections (Tamper Protection, protected system files) — doing so gives no speed benefit and is how
+"optimizers" brick Windows.
 
 Everything that changes your system is logged (`%LOCALAPPDATA%\WindowsTuner\Logs`) and either reversible or
 preceded by a System Restore point.
@@ -103,8 +117,10 @@ Command-line switches:
 
 ```
 src/WindowsTuner.Core      Engine: winget, Windows Update (COM), drivers (WMI), cleanup, startup,
-                           tweak engine + catalog, power plans, health, AppX, recommendations, tune-up, scheduler
-src/WindowsTuner.App       WPF UI (dark/light themes, 11 pages)
+                           tweak engine + catalog, power plans, health, AppX, recommendations, tune-up, scheduler,
+                           extra updaters, installed programs, large files, scheduled tasks & services,
+                           DNS benchmark & network repair, security checkup, event logs, battery, SYSTEM runner
+src/WindowsTuner.App       WPF UI (dark/light themes, 15 pages)
 tests/WindowsTuner.Tests   xUnit tests (run anywhere)
 docs/RESEARCH.md           The research behind the design, with sources
 ```

@@ -7,6 +7,26 @@
             <TextBlock Style="{StaticResource PageSubtitle}"
                        Text="Built-in Windows repair tools, wrapped in one place. Output appears in the activity log."/>
 
+            <TextBlock Style="{StaticResource H2}" Text="What Windows' logs say (last 30 days)" Margin="0,0,0,8"/>
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <ItemsControl x:Name="Findings">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock x:Name="T" Text="{Binding Text}" TextWrapping="Wrap" Margin="0,2" Foreground="{DynamicResource GoodBrush}"/>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding Problem}" Value="True">
+                                        <Setter TargetName="T" Property="Foreground" Value="{DynamicResource WarnBrush}"/>
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock x:Name="BatteryText" Margin="0,8,0,0" TextWrapping="Wrap"/>
+                    <TextBlock x:Name="BiosText" Margin="0,4,0,0" TextWrapping="Wrap" Style="{StaticResource Sub}"/>
+                </StackPanel>
+            </Border>
+
             <TextBlock Style="{StaticResource H2}" Text="Disks" Margin="0,0,0,8"/>
             <DataGrid x:Name="DiskGrid" MaxHeight="170" Margin="0,0,0,8">
                 <DataGrid.Columns>

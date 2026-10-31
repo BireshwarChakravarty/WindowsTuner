@@ -1,0 +1,82 @@
+<UserControl x:Class="WindowsTuner.App.Views.BackgroundView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:WindowsTuner.App.Views">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Style="{StaticResource H1}" Text="Background tasks"/>
+            <TextBlock Style="{StaticResource PageSubtitle}"
+                       Text="The hidden startup items Task Manager doesn't show: scheduled tasks and services installed by other apps (updaters, helpers, telemetry). Windows' own tasks and services are left out so you can't break anything important."/>
+        </StackPanel>
+        <TabControl>
+            <TabItem Header="Scheduled tasks">
+                <DockPanel>
+                    <WrapPanel DockPanel.Dock="Top">
+                        <Button x:Name="RefreshTasksButton" Content="Refresh" Click="RefreshTasks_Click"/>
+                        <Button Content="Task Scheduler" Click="TaskScheduler_Click"/>
+                        <TextBlock x:Name="TaskSummary" VerticalAlignment="Center" Margin="8,0,0,8" Style="{StaticResource Sub}"/>
+                    </WrapPanel>
+                    <DataGrid x:Name="TaskGrid" SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="On" Width="70">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Style="{StaticResource Switch}" IsChecked="{Binding IsEnabled, Mode=OneWay}" Click="TaskToggle_Click"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Task" Binding="{Binding Name}" Width="1.6*" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="When" Binding="{Binding Triggers}" Width="*" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Note" Binding="{Binding Hint}" Width="1.6*" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Runs" Binding="{Binding Action}" Width="3*" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                        <Setter Property="ToolTip" Value="{Binding Action}"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Services">
+                <DockPanel>
+                    <WrapPanel DockPanel.Dock="Top">
+                        <Button x:Name="RefreshServicesButton" Content="Refresh" Click="RefreshServices_Click"/>
+                        <Button x:Name="UpdatersManualButton" Content="Set all updaters to Manual" Click="UpdatersManual_Click"
+                                ToolTip="Updater services then only run when their app asks for them, instead of all the time."/>
+                        <Button x:Name="RestoreServicesButton" Style="{StaticResource DangerButton}" Content="Restore original start types" Click="RestoreServices_Click"/>
+                        <Button Content="Services console" Click="ServicesConsole_Click"/>
+                    </WrapPanel>
+                    <TextBlock DockPanel.Dock="Top" Style="{StaticResource Sub}" Margin="0,0,0,8"
+                               Text="Automatic = starts with Windows · Manual = starts only when needed (recommended for updaters) · Disabled = never starts. WindowsTuner remembers the original setting for every change."/>
+                    <DataGrid x:Name="ServiceGrid" SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Start type" Width="130">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox SelectedItem="{Binding StartMode, Mode=OneWay}" ItemsSource="{x:Static local:BackgroundView.StartModes}"
+                                                  SelectionChanged="StartMode_Changed" Margin="0" Padding="6,2"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Service" Binding="{Binding DisplayName}" Width="2*" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Status" Binding="{Binding State}" Width="80" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Company" Binding="{Binding Company}" Width="1.2*" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Advice" Binding="{Binding RatingText}" Width="1.6*" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="2.5*" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                        <Setter Property="ToolTip" Value="{Binding Description}"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</UserControl>

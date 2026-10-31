@@ -1,0 +1,109 @@
+using System.Text;
+
+namespace WindowsTuner.Core.Infrastructure;
+
+/// <summary>
+/// "Hyper admin": runs a command as the built-in SYSTEM account (NT AUTHORITY\SYSTEM) through a one-shot
+/// Task Scheduler job. SYSTEM can reach files and registry keys that even an elevated administrator is denied
+/// (other profiles, service folders, files owned by SYSTEM). Only used for specific, fixed operations.
+/// </summary>
+public static class SystemRunner
+{
+    public static bool Enabled { get; set; } = true;
+
+    private static string WorkDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Temp");
+
+    public static string BuildScript(string command, string outFile, string exitFile) =>
+        "@echo off\r\n" +
+        "chcp 65001 >nul\r\n" +
+        $"({command}) > \"{outFile}\" 2>&1\r\n" +
+        $"echo %errorlevel% > \"{exitFile}\"\r\n";
+
+    public static string BuildCreateArguments(string taskName, string scriptPath) =>
+        $"/Create /TN \"{taskName}\" /TR \"cmd.exe /d /c \\\"{scriptPath}\\\"\" /SC ONCE /SD 01/01/2000 /ST 00:00 /RU SYSTEM /RL HIGHEST /F";
+
+    public static async Task<ProcessResult> RunAsync(string command, TimeSpan timeout, CancellationToken ct = default)
+    {
+        if (!Enabled) return new ProcessResult(-1, "", "SYSTEM mode is turned off in Settings.");
+        if (!Elevation.IsAdministrator) return new ProcessResult(-1, "", "Administrator rights are required for SYSTEM mode.");
+
+        var id = Guid.NewGuid().ToString("N")[..10];
+        var script = Path.Combine(WorkDir, $"wt-sys-{id}.cmd");
+        var outFile = Path.Combine(WorkDir, $"wt-sys-{id}.out");
+        var exitFile = Path.Combine(WorkDir, $"wt-sys-{id}.exit");
+        var task = $@"WindowsTuner\System-{id}";
+
+        await File.WriteAllTextAsync(script, BuildScript(command, outFile, exitFile), new UTF8Encoding(false), ct);
+        try
+        {
+            Log.Info($"[SYSTEM] {command}");
+            var create = await ProcessRunner.RunAsync("schtasks.exe", BuildCreateArguments(task, script), ct: ct);
+            if (!create.Success) return new ProcessResult(-1, "", "Could not create SYSTEM task: " + create.Combined.Trim());
+            var run = await ProcessRunner.RunAsync("schtasks.exe", $"/Run /TN \"{task}\"", ct: ct);
+            if (!run.Success) return new ProcessResult(-1, "", "Could not start SYSTEM task: " + run.Combined.Trim());
+
+            var deadline = DateTime.UtcNow + timeout;
+            while (!File.Exists(exitFile) && DateTime.UtcNow < deadline)
+                await Task.Delay(500, ct);
+
+            if (!File.Exists(exitFile))
+                return new ProcessResult(-1, ReadSafe(outFile), "Timed out waiting for the SYSTEM task.");
+
+            await Task.Delay(200, ct); // let cmd flush the exit file
+            var exit = int.TryParse(ReadSafe(exitFile).Trim(), out var code) ? code : -1;
+            var output = ReadSafe(outFile);
+            foreach (var line in output.Split('\n').Select(l => l.Trim()).Where(l => l.Length > 0).Take(200))
+                Log.Output(line);
+            return new ProcessResult(exit, output, "");
+        }
+        finally
+        {
+            await ProcessRunner.RunAsync("schtasks.exe", $"/Delete /TN \"{task}\" /F", ct: CancellationToken.None);
+            foreach (var f in new[] { script, outFile, exitFile })
+            {
+                try { File.Delete(f); } catch { }
+            }
+        }
+    }
+
+    private static string ReadSafe(string path)
+    {
+        try { return File.Exists(path) ? File.ReadAllText(path) : ""; }
+        catch { return ""; }
+    }
+
+    /// <summary>
+    /// Deletes the contents of a protected folder as SYSTEM. The folder must be inside %SystemRoot% or
+    /// %ProgramData% and must not be one of those roots — a guard against ever wiping something important.
+    /// </summary>
+    public static async Task<ProcessResult> CleanFolderAsync(string folder, int minAgeDays, CancellationToken ct = default)
+    {
+        if (!IsSafeSystemCleanupFolder(folder))
+            return new ProcessResult(-1, "", $"Refusing to clean '{folder}' as SYSTEM.");
+        var full = Path.GetFullPath(folder).TrimEnd('\\');
+        var cmd = minAgeDays > 0
+            ? $"forfiles /p \"{full}\" /s /d -{minAgeDays} /c \"cmd /c if @isdir==FALSE del /f /q @path\""
+            : $"del /f /s /q \"{full}\\*\" & for /d %%d in (\"{full}\\*\") do rd /s /q \"%%d\"";
+        return await RunAsync(cmd, TimeSpan.FromMinutes(10), ct);
+    }
+
+    public static bool IsSafeSystemCleanupFolder(string folder)
+    {
+        if (string.IsNullOrWhiteSpace(folder) || folder.Contains('"') || folder.Contains('%') || folder.Contains('&')) return false;
+        string full;
+        try { full = Path.GetFullPath(folder).TrimEnd('\\', '/'); }
+        catch { return false; }
+
+        var roots = new[]
+        {
+            Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+        }.Where(r => !string.IsNullOrEmpty(r)).Select(r => r.TrimEnd('\\', '/'));
+
+        var allowedLeaves = new[] { "Temp", "Download", "ReportArchive", "ReportQueue", "Minidump", "LiveKernelReports", "Cache" };
+        var leaf = Path.GetFileName(full);
+        return roots.Any(r => full.StartsWith(r + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+                              && full.Length > r.Length + 1)
+               && allowedLeaves.Contains(leaf, StringComparer.OrdinalIgnoreCase);
+    }
+}

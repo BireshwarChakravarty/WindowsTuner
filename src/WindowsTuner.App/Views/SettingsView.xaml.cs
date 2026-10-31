@@ -18,6 +18,10 @@ public partial class SettingsView : UserControl
         Swatches.ItemsSource = ThemeManager.AccentPresets;
         CustomAccent.Text = s.AccentColor;
         RestorePoints.IsChecked = s.CreateRestorePointBeforeChanges;
+        SystemMode.IsChecked = s.UseSystemAccount;
+        PrivilegeText.Text = Elevation.IsAdministrator
+            ? $"Running as: {Environment.UserName} (administrator, elevated){(s.UseSystemAccount ? " + SYSTEM for protected operations" : "")}"
+            : "Running WITHOUT administrator rights — restart WindowsTuner as administrator.";
         Excluded.ItemsSource = s.ExcludedAppIds.ToList();
         DataPath.Text = $"Settings, logs, the tweak undo journal and backups are stored in {AppPaths.Root}";
     }
@@ -55,6 +59,8 @@ public partial class SettingsView : UserControl
     private void Option_Click(object sender, RoutedEventArgs e)
     {
         App.Settings.CreateRestorePointBeforeChanges = RestorePoints.IsChecked == true;
+        App.Settings.UseSystemAccount = SystemMode.IsChecked == true;
+        SystemRunner.Enabled = App.Settings.UseSystemAccount;
         App.Settings.Save();
     }
 

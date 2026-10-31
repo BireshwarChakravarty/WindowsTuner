@@ -29,6 +29,10 @@ public partial class MainWindow : Window
             [NavTuneUp] = () => new TuneUpView(),
             [NavUpdates] = () => new UpdatesView(),
             [NavDrivers] = () => new DriversView(),
+            [NavSecurity] = () => new SecurityView(),
+            [NavBackground] = () => new BackgroundView(),
+            [NavPrograms] = () => new ProgramsView(),
+            [NavNetwork] = () => new NetworkView(),
             [NavCleanup] = () => new CleanupView(),
             [NavStartup] = () => new StartupView(),
             [NavApps] = () => new AppsView(),
@@ -104,6 +108,10 @@ public partial class MainWindow : Window
             FixPage.Health => NavHealth,
             FixPage.Apps => NavApps,
             FixPage.TuneUp => NavTuneUp,
+            FixPage.Security => NavSecurity,
+            FixPage.Network => NavNetwork,
+            FixPage.Programs => NavPrograms,
+            FixPage.Background => NavBackground,
             _ => null,
         };
         if (target == FixPage.Restart)

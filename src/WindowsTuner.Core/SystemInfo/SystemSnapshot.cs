@@ -30,6 +30,17 @@ public sealed class SystemSnapshot
     public bool? DefenderRealTimeOn { get; set; }
     public bool AnyDiskUnhealthy { get; set; }
     public bool IsAdmin { get; set; }
+
+    // 360° checks (−1 / null = not checked yet)
+    public int BlueScreens { get; set; } = -1;
+    public int UnexpectedShutdowns { get; set; } = -1;
+    public int DiskErrors { get; set; } = -1;
+    public int HardwareErrors { get; set; } = -1;
+    public double? BootSeconds { get; set; }
+    public double? BatteryHealthPercent { get; set; }
+    public int SecurityProblems { get; set; } = -1;
+    public int SecurityWarnings { get; set; } = -1;
+    public DateTime? BiosDate { get; set; }
     public bool IsLaptop { get; set; }
 
     public double SystemDriveFreePercent =>
